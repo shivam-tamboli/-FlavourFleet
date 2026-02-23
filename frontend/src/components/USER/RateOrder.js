@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import '../CSS/RateOrder.css';
+import UserLogin from './UserLogin';
 
 export default class RateOrder extends Component {
     constructor(props) {
@@ -132,7 +133,7 @@ export default class RateOrder extends Component {
             return;
         }
 
-        axios.post("http://localhost:8080/zomato/user/rate-order", ratingData)
+        axios.post("http://localhost:9090/zomato/user/rate-order", ratingData)
             .then((resp) => {
                 console.log("✅ Rating submitted successfully:", resp.data);
                 alert("Thank you for your rating!");
@@ -162,6 +163,8 @@ export default class RateOrder extends Component {
 
     render() {
         return (
+            <>
+            <UserLogin phh={this.userPhoneNumber} />
             <div className="rate-order-container">
                 <div className="rate-order-header">
                     <button onClick={this.back} className="back-button">
@@ -254,6 +257,7 @@ export default class RateOrder extends Component {
                     </form>
                 </div>
             </div>
+            </>
         );
     }
 }

@@ -1,155 +1,60 @@
-/* Check Food Styles - UPDATED */
-.AdminCheckFood {
-    position: relative;
-    min-height: 100vh;
-    background: #f8f9fa;
-}
-
+/* ===== ADMIN CHECK FOOD / MENU ===== */
 #Checkwindow {
-    position: relative;
-    max-height: 700px;
-    overflow-y: auto;
-    background: rgba(255, 255, 255, 0.95);
-    padding: 30px;
-    width: 90%;
-    max-width: 1000px;
-    margin: 40px auto;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  max-width: 800px; margin: 40px auto; padding: 0 24px;
 }
+.AdminCheckFood { padding: 0; }
 
-.food-header {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.food-header h1 {
-    color: #ff4757;
-    font-size: 2.5rem;
-    margin-bottom: 10px;
-    font-weight: 700;
-}
-
-.food-stats {
-    color: #636e72;
-    font-size: 1.1rem;
+#artext3, #artext4 {
+  font-family: var(--ff-font-heading); font-size: 28px; font-weight: 700;
+  color: var(--ff-text); margin-bottom: 24px; text-align: center;
 }
 
 .restaurant1 {
-    padding: 25px;
-    margin-bottom: 25px;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    display: flex;
-    background: white;
-    border: 1px solid #e9ecef;
-    transition: all 0.3s ease;
-    position: relative;
+  display: grid; grid-template-columns: 120px 1fr auto;
+  align-items: center; gap: 0;
+  background: var(--ff-card); border-radius: var(--ff-radius-lg);
+  border: 1px solid var(--ff-border-light); overflow: hidden;
+  margin-bottom: 12px; transition: var(--ff-transition);
 }
-
-.restaurant1:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-}
+.restaurant1:hover { box-shadow: var(--ff-shadow); }
 
 .Checkfood {
-    height: 150px;
-    width: 150px;
-    border-radius: 10px;
-    object-fit: cover;
-    margin-right: 25px;
-    border: 3px solid white;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-}
-
-.Arbg1 {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
+  width: 120px; height: 100px; object-fit: cover;
+  background: linear-gradient(135deg, #fef3ef, #fde8e0);
 }
 
 #fooddata {
-    color: #ff4757;
-    font-size: 1.4rem;
-    font-weight: 700;
-    margin-bottom: 10px;
+  padding: 14px 18px; display: flex; flex-direction: column; gap: 2px;
 }
+#fooddata p { margin: 0; }
+#fooddata p:first-child { font-size: 15px; font-weight: 700; color: var(--ff-text); }
+#fooddata p:nth-child(2) { font-size: 16px; font-weight: 800; color: var(--ff-primary); }
+#fooddata .Description { font-size: 13px; color: var(--ff-text-secondary); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 
-.food-details {
-    color: #636e72;
-    margin-bottom: 15px;
-    line-height: 1.5;
+.Arbg1 {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 12px 16px;
 }
-
-.food-price {
-    color: #28a745;
-    font-size: 1.2rem;
-    font-weight: 700;
-    margin-bottom: 15px;
-}
-
-.action-buttons {
-    display: flex;
-    gap: 10px;
-    margin-top: auto;
-}
-
 .checkedit, .checkdelete {
-    border: none;
-    outline: none;
-    background: linear-gradient(135deg, #ff4757, #ff3742);
-    height: 40px;
-    width: 120px;
-    border-radius: 8px;
-    color: white;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
+  padding: 8px 16px; border-radius: var(--ff-radius-sm);
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: var(--ff-transition); border: none;
 }
-
-.checkedit {
-    background: linear-gradient(135deg, #28a745, #20c997);
-}
-
-.checkedit:hover {
-    background: linear-gradient(135deg, #20c997, #28a745);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
-}
-
-.checkdelete:hover {
-    background: linear-gradient(135deg, #ff3742, #ff4757);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 71, 87, 0.4);
-}
+.checkedit { background: var(--ff-primary); color: #fff; }
+.checkedit:hover { background: var(--ff-primary-dark); }
+.checkdelete { background: transparent; color: var(--ff-danger); border: 1.5px solid var(--ff-danger); }
+.checkdelete:hover { background: var(--ff-danger); color: #fff; }
 
 #addFood1, #addFood2 {
-    border: none;
-    outline: none;
-    background: linear-gradient(135deg, #ff4757, #ff3742);
-    color: white;
-    font-size: 16px;
-    font-weight: 600;
-    height: 45px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    padding: 0 25px;
-    margin: 10px;
+  display: block; width: 100%; padding: 14px;
+  background: var(--ff-accent); color: #fff; border: none;
+  border-radius: var(--ff-radius); font-size: 15px; font-weight: 700;
+  cursor: pointer; margin-top: 20px; transition: var(--ff-transition);
 }
+#addFood1:hover, #addFood2:hover { background: var(--ff-accent-dark); transform: translateY(-2px); }
 
-#addFood1:hover, #addFood2:hover {
-    background: linear-gradient(135deg, #ff3742, #ff4757);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
-}
-
-.header-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
-    gap: 15px;
+@media (max-width: 640px) {
+  .restaurant1 { grid-template-columns: 1fr; }
+  .Checkfood { width: 100%; height: 160px; }
+  .Arbg1 { flex-direction: row; padding: 10px 14px; }
 }

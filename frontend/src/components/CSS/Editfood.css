@@ -1,149 +1,35 @@
-#Addresback {
-    background-image: url(../../../public/IMAGES/Adminback.jpg);
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-    background-position: center;
-    filter: blur(5px);
-    z-index: -1;
-}
-
+/* ===== EDIT FOOD ITEM ===== */
 #EditFooditem {
-    background: white;
-    position: fixed;
-    width: 500px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    border-radius: 10px;
-    padding: 30px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  max-width: 560px; margin: 40px auto; padding: 36px 32px;
+  background: var(--ff-card); border-radius: var(--ff-radius-xl);
+  box-shadow: var(--ff-shadow); border: 1px solid var(--ff-border-light);
 }
-
-#arhead {
-    color: #ff4757;
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.current-info {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-}
-
-.current-info h3 {
-    margin: 0 0 10px 0;
-    color: #2d3436;
-}
-
-.current-info p {
-    margin: 0;
-    color: #636e72;
-}
-
 #editfoodform {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+  display: flex; flex-direction: column; gap: 16px;
 }
-
-#editfoodform input {
-    height: 45px;
-    border: 2px solid #e9ecef;
-    border-radius: 8px;
-    padding: 0 15px;
-    font-size: 16px;
-    width: 100%;
-    box-sizing: border-box;
+#editfoodform input[name] {
+  width: 100%; padding: 14px 18px; border: 2px solid var(--ff-border);
+  border-radius: var(--ff-radius); font-size: 15px; transition: var(--ff-transition);
 }
+#editfoodform input[name]:focus { border-color: var(--ff-primary); box-shadow: 0 0 0 4px rgba(255,107,53,0.1); }
 
-#editfoodform input:focus {
-    border-color: #ff4757;
-    outline: none;
-}
-
-.image-section h4 {
-    margin: 20px 0 10px 0;
-    color: #2d3436;
-}
-
-.current-image {
-    text-align: center;
-    margin-bottom: 15px;
-}
-
-.current-image img {
-    width: 150px;
-    height: 120px;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 2px solid #e9ecef;
-    margin-bottom: 10px;
-}
-
+.image-section h4 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+.current-image { position: relative; display: inline-block; margin-bottom: 12px; }
+.current-image img { width: 120px; height: 90px; object-fit: cover; border-radius: var(--ff-radius-sm); }
 .current-image button {
-    background: #dc3545;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 6px;
-    cursor: pointer;
+  display: block; margin-top: 8px; padding: 6px 14px; background: transparent;
+  color: var(--ff-danger); border: 1.5px solid var(--ff-danger);
+  border-radius: var(--ff-radius-sm); font-size: 13px; cursor: pointer;
+  transition: var(--ff-transition);
 }
-
-.add-image {
-    display: flex;
-    gap: 10px;
-}
-
-.add-image input {
-    flex: 1;
-}
-
-.add-image button {
-    background: #28a745;
-    color: white;
-    border: none;
-    padding: 0 20px;
-    border-radius: 6px;
-    cursor: pointer;
-}
+.current-image button:hover { background: var(--ff-danger); color: #fff; }
+.no-image { padding: 20px; background: var(--ff-border-light); border-radius: var(--ff-radius); text-align: center; }
+.no-image p { color: var(--ff-text-light); font-size: 14px; }
 
 #editfoodsubmit {
-    background: #ff4757;
-    color: white;
-    border: none;
-    height: 50px;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 10px;
+  width: 100%; padding: 15px; background: var(--ff-primary); color: #fff;
+  border: none; border-radius: var(--ff-radius); font-size: 16px;
+  font-weight: 700; cursor: pointer; transition: var(--ff-transition);
 }
-
-#editfoodsubmit:hover {
-    background: #ff3742;
-}
-
-/* Loading state */
-#editfoodsubmit:disabled {
-    background: #6c757d;
-    cursor: not-allowed;
-}
-
-#editfoodsubmit:disabled:hover {
-    background: #6c757d;
-    transform: none;
-}
-
-.no-image {
-    text-align: center;
-    padding: 20px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    border: 2px dashed #dee2e6;
-    color: #6c757d;
-    margin-bottom: 15px;
-}
+#editfoodsubmit:hover { background: var(--ff-primary-dark); transform: translateY(-2px); }
+#editfoodsubmit:disabled { background: var(--ff-border); cursor: not-allowed; }

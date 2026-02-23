@@ -163,6 +163,9 @@ public class UserController {
         return userService.getFoodItemsByRestaurant(entity);
     }
 
-
+    @PostMapping(value = "/get-profile")
+    public ResponseEntity<Map<String, String>> getProfile(@RequestBody Map<String, String> entity) {
+        return userService.getProfile(entity);
+    }
 
 }

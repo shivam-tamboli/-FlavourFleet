@@ -3,54 +3,40 @@ import axios from 'axios';
 import '../CSS/Showuserfood.css';
 import UserLogin from './UserLogin';
 import { withRouter } from 'react-router-dom';
+import { getFoodImage } from '../utils/foodImages';
 
 class ShowUserFoods extends Component {
     constructor(props) {
         super(props);
 
-        // ✅ FIX: Get data from React Router props, NOT URL parameters
         const locationState = this.props.location?.state || {};
-        this.restaurantId = locationState.restaurantId;
-        this.userPhoneNumber = locationState.phonenum;
-
-        console.log("Restaurant ID from PROPS:", this.restaurantId);
-        console.log("User Phone from PROPS:", this.userPhoneNumber);
+        this.userPhoneNumber = locationState.phonenum ||
+            localStorage.getItem('userPhoneNumber') || '';
 
         this.state = {
             listOfFoods: [],
+            allFoods: [],
             loading: true,
+            searchQuery: '',
         };
     }
 
     componentDidMount() {
-        console.log("PROPS IN DID MOUNT:", this.props);
-
-        // ✅ FIX: Check if we have required data - if not, redirect to restaurant list
-        if (!this.restaurantId || !this.userPhoneNumber) {
-            console.error("Missing required data. Redirecting to restaurant list...");
-            this.props.history.push({
-                pathname: "/Userrestaurant",
-                state: { phonenum: this.userPhoneNumber }
-            });
+        if (!this.userPhoneNumber) {
+            this.props.history.push("/Login");
             return;
         }
-
         this.fetchFoodItems();
     }
 
     fetchFoodItems = () => {
-        // ✅ FIX: Use correct API endpoint
         axios
-            .get(`http://localhost:8080/zomato/user/get-all-food-items`)
+            .get(`http://localhost:9090/zomato/user/get-all-food-items`)
             .then((resp) => {
-                console.log("All food items:", resp.data);
                 if (resp.data && Array.isArray(resp.data)) {
-                    // Filter foods by restaurantId
-                    const restaurantFoods = resp.data.filter(food =>
-                        food.restaurantId === this.restaurantId
-                    );
                     this.setState({
-                        listOfFoods: restaurantFoods,
+                        listOfFoods: resp.data,
+                        allFoods: resp.data,
                         loading: false
                     });
                 } else {
@@ -63,9 +49,55 @@ class ShowUserFoods extends Component {
             });
     };
 
-    orderFood = (e) => {
-        const index = e.target.parentNode.id;
+    searchFoods = (e) => {
+        const query = e.target.value;
+        this.setState({ searchQuery: query });
+
+        if (query.trim() === '') {
+            this.setState({ listOfFoods: this.state.allFoods });
+            return;
+        }
+
+        const q = query.toLowerCase();
+
+        // Also try backend search-by-fooditem API
+        axios.post("http://localhost:9090/zomato/user/search-by-fooditem", { search: query })
+            .then((resp) => {
+                if (resp.data && resp.data.length > 0) {
+                    // Map SearchFoodItem results to same format as get-all-food-items
+                    const mapped = resp.data.map(item => ({
+                        restaurantId: item.restaurantId,
+                        restaurantName: item.restaurantName,
+                        foodItem: item.foodItem
+                    }));
+                    this.setState({ listOfFoods: mapped });
+                } else {
+                    // Fallback to client-side filter
+                    const filtered = this.state.allFoods.filter(item => {
+                        const fn = (item.foodItem?.foodName || '').toLowerCase();
+                        const rn = (item.restaurantName || '').toLowerCase();
+                        return fn.includes(q) || rn.includes(q);
+                    });
+                    this.setState({ listOfFoods: filtered });
+                }
+            })
+            .catch(() => {
+                // Fallback to client-side
+                const filtered = this.state.allFoods.filter(item => {
+                    const fn = (item.foodItem?.foodName || '').toLowerCase();
+                    const rn = (item.restaurantName || '').toLowerCase();
+                    return fn.includes(q) || rn.includes(q);
+                });
+                this.setState({ listOfFoods: filtered });
+            });
+    };
+
+    orderFood = (index) => {
         const foodDetail = this.state.listOfFoods[index];
+        if (!foodDetail || !foodDetail.foodItem) {
+            alert("Error: Could not find food item data.");
+            return;
+        }
         const foodData = foodDetail.foodItem;
 
         let obj = {
@@ -81,7 +113,6 @@ class ShowUserFoods extends Component {
             quantity: [1],
         };
 
-        // ✅ FIX: Use this.props.history instead of History
         this.props.history.push({
             pathname: "/Placeorder",
             state: {
@@ -92,27 +123,15 @@ class ShowUserFoods extends Component {
     };
 
     render() {
-        const { listOfFoods, loading } = this.state;
+        const { listOfFoods, loading, searchQuery } = this.state;
 
         if (loading) {
             return (
                 <>
                     <UserLogin phh={this.userPhoneNumber} />
-                    <div className="ShowUserFoods">
-                        <p style={{ textAlign: 'center' }}>Loading foods...</p>
-                    </div>
-                </>
-            );
-        }
-
-        if (!listOfFoods || listOfFoods.length === 0) {
-            return (
-                <>
-                    <UserLogin phh={this.userPhoneNumber} />
-                    <div className="ShowUserFoods">
-                        <p style={{ textAlign: 'center' }}>No Foods Available for this restaurant</p>
-                        <p style={{ textAlign: 'center' }}>Restaurant ID: {this.restaurantId}</p>
-                        <p style={{ textAlign: 'center' }}>User Phone: {this.userPhoneNumber}</p>
+                    <div className="ShowUserFoods" style={{textAlign:'center',paddingTop:'80px'}}>
+                        <div className="ff-spinner"></div>
+                        <p style={{marginTop:'16px',color:'#6B7280'}}>Loading foods...</p>
                     </div>
                 </>
             );
@@ -122,34 +141,88 @@ class ShowUserFoods extends Component {
             <>
                 <UserLogin phh={this.userPhoneNumber} />
                 <div className="ShowUserFoods">
+                    <div className="food-search-section">
+                        <h2>All Dishes</h2>
+                        <div className="food-search-bar">
+                            <span className="search-icon">🔍</span>
+                            <input
+                                type="search"
+                                value={searchQuery}
+                                onChange={this.searchFoods}
+                                placeholder="Search dishes by name or restaurant..."
+                                className="food-search-input"
+                            />
+                            {searchQuery && (
+                                <button
+                                    className="search-clear-btn"
+                                    onClick={() => this.setState({ searchQuery: '', listOfFoods: this.state.allFoods })}
+                                >✕</button>
+                            )}
+                        </div>
+                        {searchQuery && (
+                            <p className="search-result-count">{listOfFoods.length} result{listOfFoods.length !== 1 ? 's' : ''} found</p>
+                        )}
+                    </div>
+
+                    {listOfFoods.length === 0 ? (
+                        <div style={{textAlign:'center',padding:'60px 24px'}}>
+                            <h3 style={{color:'#374151'}}>No dishes found</h3>
+                            <p style={{color:'#6B7280',margin:'8px 0 20px'}}>Try a different search term</p>
+                            <button
+                                className="ff-btn ff-btn-secondary"
+                                onClick={() => this.setState({ searchQuery: '', listOfFoods: this.state.allFoods })}
+                            >Show All Dishes</button>
+                        </div>
+                    ) : (
                     <div className="foodlistuser">
                         {listOfFoods.map((foodDetail, index) => {
-                            const foodData = foodDetail.foodItem;
-                            const rating = foodData.foodItemRating ? foodData.foodItemRating.toFixed(2) : "No rating";
-                            const price = foodData.price || "N/A";
+                            const foodData = foodDetail?.foodItem;
+                            if (!foodData) return null;
+                            const rating = foodData.foodItemRating ? foodData.foodItemRating.toFixed(1) : "New";
+                            const price = foodData.price || "199";
+                            const foodName = foodData.foodName || 'Delicious Food';
+                            const foodImage = getFoodImage(foodName, index);
 
                             return (
-                                <div className="restaurantsf" key={foodData.foodItemId} id={index}>
-                                    <div id="fooddata">
-                                        <p>Dish : {foodData.foodName}</p>
-                                        <p>Price : Rs.{price}/-</p>
-                                        <p className="UFLResname">Restaurant : {foodDetail.restaurantName}</p>
-                                        <p className="UFLDescription">Description : {foodData.description}</p>
-                                        <p className="UFLRating">Rating : {rating} / 5</p>
+                                <div className="restaurantsf" key={foodData.foodItemId || index} id={index}>
+                                    <div className="food-image-container">
+                                        <img
+                                            src={foodImage}
+                                            alt={foodName}
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.src = getFoodImage('', index);
+                                            }}
+                                        />
                                     </div>
-                                    <button onClick={this.orderFood} className="UFLOrderb">
-                                        Order
-                                    </button>
-                                    <img src={foodData.image} alt={foodData.foodName} className="Checkfood" />
+                                    <div className="food-content">
+                                        <div className="food-info">
+                                            <h3 className="food-name">{foodName}</h3>
+                                            <p className="food-price">₹{price}</p>
+                                            <p className="UFLResname">{foodDetail.restaurantName || 'Restaurant'}</p>
+                                            <p className="UFLDescription">{foodData.description || "Freshly prepared with quality ingredients"}</p>
+                                        </div>
+                                        <div className="food-footer">
+                                            <span className="UFLRating">★ {rating}</span>
+                                            <button onClick={() => this.orderFood(index)} className="UFLOrderb">
+                                                Order Now
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             );
                         })}
                     </div>
+                    )}
                 </div>
             </>
         );
     }
 }
 
-// ✅ FIX: Export with withRouter
 export default withRouter(ShowUserFoods);
+
+
+
+
+

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import '../CSS/UserOrders.css';
+import UserLogin from './UserLogin';
 
 export default class UserOrders extends Component {
     constructor(props) {
@@ -42,7 +43,7 @@ export default class UserOrders extends Component {
             console.log("📥 Fetching orders for phone:", this.userPhoneNumber);
 
             const response = await axios.post(
-                "http://localhost:8080/zomato/user/get-all-order-details",
+                "http://localhost:9090/zomato/user/get-all-order-details",
                 { phonenumber: this.userPhoneNumber },
                 {
                     timeout: 10000,
@@ -80,6 +81,7 @@ export default class UserOrders extends Component {
                     restaurantName: order.restaurantName || order.restaurantname || "Unknown Restaurant",
                     totalAmount: order.totalAmount || order.totalamount || 0,
                     deliveryAddress: order.deliveryAddress || order.deliveryaddress || "Not specified",
+                    orderFlag: order.orderFlag || order.orderflag || 0,
                     foodItems: order.orderFoodItems || order.foodItems || order.fooditems || []
                 };
             });
@@ -175,51 +177,55 @@ export default class UserOrders extends Component {
 
         if (loading) {
             return (
-                <div className="user-orders-container">
-                    <div className="loading-message">
-                        <h2>Loading your orders...</h2>
-                        <p>Please wait while we fetch your order history.</p>
-                        <div className="loading-spinner"></div>
+                <>
+                    <UserLogin phh={this.userPhoneNumber} />
+                    <div className="user-orders-container">
+                        <div className="loading-message">
+                            <div className="ff-spinner"></div>
+                            <h2>Loading your orders...</h2>
+                        </div>
                     </div>
-                </div>
+                </>
             );
         }
 
         if (error) {
             return (
-                <div className="user-orders-container">
-                    <div className="error-message">
-                        <h2>Error</h2>
-                        <p>{error}</p>
-                        <div className="error-actions">
-                            <button onClick={this.retryFetchOrders} className="retry-btn">
-                                🔄 Try Again
-                            </button>
-                            <button onClick={this.navigateToHome} className="home-btn">
-                                🏠 Go to Home
-                            </button>
+                <>
+                    <UserLogin phh={this.userPhoneNumber} />
+                    <div className="user-orders-container">
+                        <div className="error-message">
+                            <h2>⚠️ Error</h2>
+                            <p>{error}</p>
+                            <div className="error-actions">
+                                <button onClick={this.retryFetchOrders} className="retry-btn">🔄 Try Again</button>
+                                <button onClick={this.navigateToHome} className="home-btn">🏠 Home</button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </>
             );
         }
 
         if (orders.length === 0) {
             return (
-                <div className="user-orders-container">
-                    <div className="no-orders-message">
-                        <h2>No Orders Found</h2>
-                        <p>You haven't placed any orders yet.</p>
-                        <button onClick={this.navigateToRestaurants} className="order-now-btn">
-                            🍕 Order Now
-                        </button>
+                <>
+                    <UserLogin phh={this.userPhoneNumber} />
+                    <div className="user-orders-container">
+                        <div className="no-orders-message">
+                            <h2>No Orders Yet</h2>
+                            <p>You haven't placed any orders yet. Start exploring restaurants!</p>
+                            <button onClick={this.navigateToRestaurants} className="order-now-btn">🍕 Order Now</button>
+                        </div>
                     </div>
-                </div>
+                </>
             );
         }
 
         return (
-            <div className="user-orders-container">
+            <>
+                <UserLogin phh={this.userPhoneNumber} />
+                <div className="user-orders-container">
                 {/* Header Section with New Order Button */}
                 <header className="orders-header">
                     <div className="header-content">
@@ -233,35 +239,32 @@ export default class UserOrders extends Component {
                 {/* Orders List */}
                 <div className="orders-list">
                     {orders.map((order, index) => {
-                        console.log(`Order ${index} data:`, order);
                         return (
                             <div key={order.orderId || index} className="order-card">
                                 <h2>Order #{order.orderId}</h2>
 
                                 <div className="order-details">
                                     <p className="restaurant-name">
-                                        <strong>Restaurant: {order.restaurantName}</strong>
+                                        <strong>🍽️ {order.restaurantName}</strong>
                                     </p>
                                     <p className="delivery-address">
-                                        Delivery to: {order.deliveryAddress}
+                                        📍 {order.deliveryAddress}
                                     </p>
                                     <p className="total-amount">
-                                        Total: ₹{order.totalAmount}
+                                        ₹{order.totalAmount}
                                     </p>
 
                                     <div className="food-items">
-                                        <strong>Items:</strong>
+                                        <strong>Items Ordered:</strong>
                                         <ul>
                                             {order.foodItems && order.foodItems.length > 0 ? (
                                                 order.foodItems.map((item, itemIndex) => (
                                                     <li key={itemIndex}>
-                                                        {item.foodName || "Unknown Item"}
-                                                        (Qty: {item.quantity || 1})
-                                                        - ₹{item.amount || 0}
+                                                        {item.foodName || "Unknown Item"} × {item.quantity || 1} — ₹{item.amount || 0}
                                                     </li>
                                                 ))
                                             ) : (
-                                                <li>No items details available</li>
+                                                <li>No item details available</li>
                                             )}
                                         </ul>
                                     </div>
@@ -269,20 +272,21 @@ export default class UserOrders extends Component {
 
                                 <hr className="order-divider" />
 
-                                {/* Rating button for EVERY order */}
                                 <div className="order-actions">
-                                    <button
-                                        onClick={() => this.rateOrder(order)}
-                                        className="rate-btn"
-                                    >
-                                        * Rate This Order *
-                                    </button>
+                                    {order.orderFlag === 1 ? (
+                                        <span className="rated-badge">✅ Rated</span>
+                                    ) : (
+                                        <button onClick={() => this.rateOrder(order)} className="rate-btn">
+                                            ⭐ Rate This Order
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         );
                     })}
                 </div>
             </div>
+            </>
         );
     }
 }

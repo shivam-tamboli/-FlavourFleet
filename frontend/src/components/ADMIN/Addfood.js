@@ -1,154 +1,103 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';
-import '../CSS/Addfood.css'
+import '../CSS/Addres.css'
+import { getFoodImage } from '../utils/foodImages';
 
 class AddFooditem extends Component {
-    constructor(props){
+    constructor(props) {
         super(props);
+        this.restaurantId = this.props.location?.state?.resid;
+        this.state = { foodName: '', description: '', price: '', image: '' };
+    }
 
-
-        const restaurantId = this.props.location?.state?.resid;
-        console.log("Restaurant ID received:", restaurantId);
-
-        if (!restaurantId) {
-            console.error("❌ NO RESTAURANT ID RECEIVED!");
-            alert("Error: No restaurant selected. Going back to admin.");
+    componentDidMount() {
+        if (!this.restaurantId) {
+            alert("No restaurant selected.");
             this.props.history.push('/Admin');
-            return;
         }
-
-        this.fooditem = {
-            restaurantId: Number(restaurantId),
-            foodName: null,
-            description: null,
-            price: null,
-            image: null
-        };
-        this.count = 0;
     }
 
     submit = (e) => {
         e.preventDefault();
-        console.log("Submitting food item...");
+        const { foodName, description, price, image } = this.state;
+        if (!foodName || !description || !price) { alert("Please fill all fields"); return; }
 
-        this.fooditem.foodName = document.getElementById('foodname').value;
-        this.fooditem.description = document.getElementById("fooddescription").value;
-        this.fooditem.price = document.getElementById("foodprice").value;
+        const finalImage = image || getFoodImage(foodName, 0);
 
-
-        if (!this.fooditem.image) {
-            this.fooditem.image = "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop";
-            console.log("No image provided, using default image");
-        }
-
-        console.log("Food data being sent:", this.fooditem);
-
-        if (!this.fooditem.foodName || !this.fooditem.description || !this.fooditem.price) {
-            alert("Please fill all required fields");
-            return;
-        }
-
-        axios.post("http://localhost:8080/zomato/admin/add-fooditems", this.fooditem)
-            .then((resp) => {
-                console.log("Success:", resp.data);
-                this.props.history.push({
-                    pathname: '/Viewmenu',
-                    state: {
-                        resid: this.fooditem.restaurantId
-                    }
-                });
-            })
-            .catch((err) => {
-                console.log("Error details:", err.response?.data || err.message);
-                alert("Failed to add food item: " + (err.response?.data?.message || err.message));
-            });
-    }
-
-    uploadImage = (e) => {
-        const imageUrl = document.getElementById("enterFoodImage").value;
-
-        if (!imageUrl) {
-            alert("Please enter an image URL");
-            return;
-        }
-
-        this.fooditem.image = imageUrl;
-
-        let section = document.createElement('div');
-        section.className = "Image";
-        section.id = this.count;
-
-        let img = document.createElement('img');
-        img.src = imageUrl;
-        img.setAttribute("class", "AAddedimg");
-
-        let button = document.createElement('button');
-        button.textContent = "X";
-        button.onclick = (e) => this.removeImage(e, this.count);
-        button.setAttribute("class", "imgxf");
-
-        section.appendChild(img);
-        section.appendChild(button);
-        document.getElementById('FoodImage').appendChild(section);
-        section.setAttribute("class", "imgwrp");
-
-        document.getElementById("addFoodImage").style.visibility = "hidden";
-        document.getElementById("enterFoodImage").style.visibility = "hidden";
-
-        this.count++;
-    }
-
-    removeImage = (e, index) => {
-        let ele = e.target.parentNode;
-        this.fooditem.image = null;
-        ele.parentNode.removeChild(ele);
-        document.getElementById("addFoodImage").style.visibility = "visible";
-        document.getElementById("enterFoodImage").style.visibility = "visible";
-    }
-
-    changeType = (e) => {
-        e.target.type = "number";
-    }
-
-    restrictE = (e) => {
-        if((e.key === 'e' || e.target.value > 1000) && e.key !== "Backspace"){
-            e.preventDefault();
-        }
+        axios.post("http://localhost:9090/zomato/admin/add-fooditems", {
+            restaurantId: Number(this.restaurantId),
+            foodName, description,
+            price: Number(price),
+            image: finalImage
+        })
+        .then(() => {
+            this.props.history.push({ pathname: '/Viewmenu', state: { resid: this.restaurantId } });
+        })
+        .catch((err) => alert("Failed: " + (err.response?.data || err.message)));
     }
 
     back = () => {
-        this.props.history.push({
-            pathname: "/Admin",
-        });
+        this.props.history.push({ pathname: '/Viewmenu', state: { resid: this.restaurantId } });
     }
 
     render() {
-        return (
-            <>
-                <div id="Addresback"></div>
-                <div id="Admintag">
-                    <img src='../IMAGES/Adminic.png' alt='Not found'></img>
-                    <p>ADMIN</p>
-                </div>
-                <img src="../IMAGES/Home.png" alt="Not found" className='Home' onClick={this.back}></img>
+        const { foodName, description, price, image } = this.state;
+        const previewImg = image || (foodName ? getFoodImage(foodName, 0) : '');
 
-                <div className='AddFooditem' id='AddFooditem'>
-                    <h1 id="arhead">Add Food Item</h1>
-                    <form id="addfoodform">
-                        <input id='foodname' type="text" maxLength={50} placeholder='Enter Food Name' required></input>
-                        <input id="fooddescription" type="text" maxLength={100} placeholder='Enter Food Description' required></input>
-                        <input id="foodprice" type="text" onClick={this.changeType} onKeyDown={this.restrictE} placeholder='Enter Food Price' required></input>
-                        <div id='FoodImage'></div>
-                        <input id="enterFoodImage" type="url" placeholder='Enter Image URL'></input>
-                        <input id="addFoodImage" type="button" value='+' onClick={this.uploadImage}></input>
-                        <input id="addfoodsubmit" type='button' value='Submit' onClick={this.submit}></input>
-                    </form>
+        return (
+            <div className="admin-form-page">
+                <nav className="admin-topnav">
+                    <div className="admin-topnav-left">
+                        <span className="admin-logo-icon">🚀</span>
+                        <span className="admin-logo-text">FlavourFleet</span>
+                        <span className="admin-badge">Admin Panel</span>
+                    </div>
+                    <button className="admin-back-btn" onClick={this.back}>← Back to Menu</button>
+                </nav>
+
+                <div className="admin-form-container">
+                    <div className="admin-form-card">
+                        <div className="afc-header">
+                            <span className="afc-icon">🍕</span>
+                            <div>
+                                <h2>Add Food Item</h2>
+                                <p>Restaurant #{this.restaurantId}</p>
+                            </div>
+                        </div>
+
+                        <form onSubmit={this.submit}>
+                            <label className="admin-label">Food Name</label>
+                            <input type="text" className="admin-input" placeholder="e.g. Margherita Pizza"
+                                value={foodName} onChange={e => this.setState({foodName: e.target.value})} required />
+
+                            <label className="admin-label">Description</label>
+                            <textarea className="admin-textarea" placeholder="Describe the dish..."
+                                value={description} onChange={e => this.setState({description: e.target.value})} required />
+
+                            <label className="admin-label">Price (₹)</label>
+                            <input type="number" className="admin-input" placeholder="e.g. 299"
+                                value={price} onChange={e => this.setState({price: e.target.value})} min="1" max="9999" required />
+
+                            <label className="admin-label">Image URL (optional)</label>
+                            <input type="url" className="admin-input" placeholder="Paste image URL or leave blank for auto-image"
+                                value={image} onChange={e => this.setState({image: e.target.value})} />
+
+                            {previewImg && (
+                                <div style={{marginTop:'12px',borderRadius:'12px',overflow:'hidden',height:'160px',border:'1px solid #E5E7EB'}}>
+                                    <img src={previewImg} alt="Preview" style={{width:'100%',height:'100%',objectFit:'cover'}}
+                                        onError={e => { e.target.style.display='none'; }} />
+                                </div>
+                            )}
+
+                            <button type="submit" className="admin-submit-btn">🍕 Add Food Item</button>
+                        </form>
+                    </div>
                 </div>
-            </>
+            </div>
         );
     }
 }
 
-
 export default withRouter(AddFooditem);
+

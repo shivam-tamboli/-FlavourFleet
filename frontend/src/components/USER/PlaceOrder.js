@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import '../CSS/Placeorder.css'
+import UserLogin from './UserLogin';
 
 export default class PlaceOrder extends Component {
 
@@ -157,14 +158,56 @@ export default class PlaceOrder extends Component {
         console.log("Final order object being sent:", JSON.stringify(this.obj, null, 2));
         console.log("Phone number verification:", this.obj.phonenumber);
 
-        axios.post("http://localhost:8080/zomato/user/place-order", this.obj)
+        axios.post("http://localhost:9090/zomato/user/place-order", this.obj)
             .then((resp) => {
                 console.log("Order successful:", resp.data);
-                this.props.history.push({
-                    pathname: "/Orders",
-                    state: {
-                        phonenum: this.userPhoneNumber
+
+                // After placing order, redirect to rate the order
+                // First fetch the latest order to get its ID
+                axios.post("http://localhost:9090/zomato/user/get-all-order-details", {
+                    phonenumber: this.userPhoneNumber
+                }).then((orderResp) => {
+                    const orders = orderResp.data || [];
+                    // Get the most recent order (last one)
+                    const latestOrder = orders[orders.length - 1];
+                    if (latestOrder) {
+                        const orderForRating = {
+                            orderId: latestOrder.orderId,
+                            orderid: latestOrder.orderId,
+                            restaurantId: latestOrder.restaurantId,
+                            restaurantid: latestOrder.restaurantId,
+                            restaurantName: latestOrder.restaurantName,
+                            restaurantname: latestOrder.restaurantName,
+                            orderFoodItems: (latestOrder.orderFoodItems || []).map(item => ({
+                                foodItemId: item.foodItemId,
+                                fooditemid: item.foodItemId,
+                                foodName: item.foodName,
+                                foodname: item.foodName,
+                                quantity: item.quantity,
+                                amount: item.amount
+                            }))
+                        };
+
+                        this.props.history.push({
+                            pathname: "/Rate",
+                            state: {
+                                obj: orderForRating,
+                                phonenum: this.userPhoneNumber
+                            }
+                        });
+                    } else {
+                        // Fallback to orders page if we can't find the order
+                        this.props.history.push({
+                            pathname: "/Orders",
+                            state: { phonenum: this.userPhoneNumber }
+                        });
                     }
+                }).catch(() => {
+                    // Fallback to orders page
+                    this.props.history.push({
+                        pathname: "/Orders",
+                        state: { phonenum: this.userPhoneNumber }
+                    });
                 });
             })
             .catch((err) => {
@@ -222,66 +265,83 @@ export default class PlaceOrder extends Component {
     render() {
         if(this.obj.fooditemid.length === 0){
             return(
+                <>
+                <UserLogin phh={this.userPhoneNumber} />
                 <div className='PlaceOrder'>
-                    <h2>No items in order</h2>
-                    <p>Please go back and add food items to your order</p>
-                    <button onClick={this.back}>
-                        Go Back
-                    </button>
+                    <div className='order-container'>
+                        <div className='order-header'>
+                            <h2>No items in order</h2>
+                            <p>Please go back and add food items to your order</p>
+                        </div>
+                        <button onClick={this.back} id="ordsub">← Go Back</button>
+                    </div>
                 </div>
+                </>
             );
         } else {
             return (
                 <>
-                    <div id="Adlogback"></div>
-                    <div id="Admintag">
-                        <img src='../IMAGES/Userpic.png' alt='User profile'></img>
-                        <p>USER</p>
-                    </div>
-                    <img src="../IMAGES/Home.png" alt="Home" className='Home' onClick={this.back}></img>
-                    <div className='PlaceOrder'>
-                        <h1 id="arhead">Place Order : {this.obj.restaurantname}</h1>
+                <UserLogin phh={this.userPhoneNumber} />
+                <div className='PlaceOrder'>
+                    <div className='order-container'>
+                        <div className='order-header'>
+                            <h2>Place Order</h2>
+                            <p style={{color: '#636e72', marginBottom: '20px'}}>{this.obj.restaurantname}</p>
+                        </div>
 
-                        {/* Phone number display for debugging */}
-                        <p style={{
-                            color: this.userPhoneNumber ? 'green' : 'red',
-                            fontWeight: 'bold',
-                            fontSize: '16px'
-                        }}>
-                            Phone: {this.userPhoneNumber || "NOT SET - This will cause error!"}
-                        </p>
+                        {this.obj.image && (
+                            <img
+                                src={this.obj.image}
+                                alt={this.obj.restaurantname}
+                                className='orderimg'
+                                onError={(e) => {e.target.style.display='none'}}
+                            />
+                        )}
 
-                        <form className='Orderform'>
+                        <div className='Orderform'>
                             {
                                 this.obj.fooditemid.map((value, index) => {
                                     return(
                                         <div className='FoodItem' key={index} id={index}>
-                                            <p className='Orddishname'>Dish : {this.obj.foodname[index]}</p>
-                                            <p className='Orddishprice'>Price : {this.obj.amount[index]}</p>
-                                            <label htmlFor={'quantity'+index} className='ordqntl'>Quantity : </label>
-                                            <button className="ordd" onClick={this.decrement} id={'d'+index}>-</button>
-                                            <input
-                                                type='number'
-                                                min={1}
-                                                placeholder='1'
-                                                id={'quantity'+index}
-                                                onChange={this.billCheck}
-                                                className='ordqnt'
-                                                defaultValue="1"
-                                            ></input>
-                                            <button className="ordi" onClick={this.increment} id={'i'+index}>+</button>
+                                            <p className='Orddishname'>{this.obj.foodname[index]}</p>
+                                            <p className='Orddishprice'>₹{this.obj.amount[index]}</p>
+                                            <p className='ordqntl'>Quantity</p>
+                                            <div className='quantity-controls'>
+                                                <button className="ordd" onClick={this.decrement} id={'d'+index}>-</button>
+                                                <input
+                                                    type='number'
+                                                    min={1}
+                                                    placeholder='1'
+                                                    id={'quantity'+index}
+                                                    onChange={this.billCheck}
+                                                    className='ordqnt'
+                                                    defaultValue="1"
+                                                    readOnly
+                                                ></input>
+                                                <button className="ordi" onClick={this.increment} id={'i'+index}>+</button>
+                                            </div>
                                         </div>
                                     );
                                 })
                             }
-                        </form>
-                        <h3 className='Totalamt'>
-                            Total Amount : {this.state.totalamount}
-                        </h3>
-                        <input type="text" placeholder='Enter Delivery Address' id='deliveryAddress'></input>
-                        <input type="button" onClick={this.addMore} value={"Add More"} id="addmore"></input>
-                        <input type="submit" onClick={this.order} value={"Order"} id="ordsub"></input>
+                        </div>
+
+                        <div className='Totalamt'>
+                            Total Amount: ₹{this.state.totalamount}
+                        </div>
+
+                        <input
+                            type="text"
+                            placeholder='Enter Delivery Address'
+                            id='deliveryAddress'
+                        />
+
+                        <div className='order-actions'>
+                            <button onClick={this.addMore} id="addmore">+ Add More</button>
+                            <button onClick={this.order} id="ordsub">Place Order</button>
+                        </div>
                     </div>
+                </div>
                 </>
             );
         }

@@ -1,211 +1,247 @@
-/* Admin Login Styles - UPDATED */
-#Adlogback {
-    position: absolute;
-    background-image: url(../../../public/IMAGES/Adminback.jpg);
-    background-size: cover;
-    background-position: center;
-    width: 100%;
-    height: 100%;
-    filter: blur(3px);
-    z-index: -1;
+/* ===== ADMIN DASHBOARD ===== */
+#Adlogback, #Admintag, .Home, .Logout { display: none; }
+
+.admin-dashboard {
+  min-height: 100vh; background: #F3F4F6; font-family: 'Inter', sans-serif;
 }
 
-.AdminLogin {
-    position: relative;
-    max-height: 80vh;
-    overflow-y: auto;
-    background: rgba(255, 255, 255, 0.95);
-    padding: 40px;
-    width: 90%;
-    max-width: 1200px;
-    margin: 50px auto;
-    border-radius: 20px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+/* ─── Top Navigation ─── */
+.admin-topnav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 64px;
+  background: #1B1B2F; display: flex; align-items: center;
+  justify-content: space-between; padding: 0 28px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+}
+.admin-topnav-left {
+  display: flex; align-items: center; gap: 10px;
+}
+.admin-logo-icon { font-size: 24px; }
+.admin-logo-text {
+  font-family: 'Space Grotesk', sans-serif; font-size: 20px;
+  font-weight: 800; color: #FF6B35;
+}
+.admin-badge {
+  font-size: 11px; font-weight: 700; color: #fff;
+  background: rgba(255,255,255,0.12); padding: 3px 12px;
+  border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase;
+}
+.admin-topnav-right { display: flex; align-items: center; gap: 16px; }
+
+/* ─── Admin Profile Dropdown ─── */
+.admin-profile-wrapper { position: relative; }
+.admin-profile-btn {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,0.08); border: none; cursor: pointer;
+  padding: 6px 14px 6px 6px; border-radius: 50px;
+  transition: all 0.25s;
+}
+.admin-profile-btn:hover { background: rgba(255,255,255,0.15); }
+
+.admin-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, #FF6B35, #E84118);
+  color: #fff; font-weight: 700; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+}
+.admin-profile-name {
+  font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9);
+}
+.admin-profile-arrow {
+  font-size: 10px; color: rgba(255,255,255,0.5);
 }
 
-#wcadmin {
-    color: #ff4757;
-    text-align: center;
-    font-size: 3rem;
-    font-weight: 800;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 3px solid #ff4757;
+.admin-profile-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 199;
+}
+.admin-profile-dropdown {
+  position: absolute; top: calc(100% + 10px); right: 0;
+  width: 290px; background: #fff; border-radius: 16px; z-index: 200;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.05);
+  animation: adminDropSlide 0.2s ease; overflow: hidden;
+}
+@keyframes adminDropSlide {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.restaurant {
-    padding: 25px;
-    margin-bottom: 30px;
-    border-radius: 15px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-    display: flex;
-    background: white;
-    border: 1px solid #e9ecef;
-    transition: all 0.3s ease;
-    position: relative;
+.admin-profile-dropdown-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 20px; background: linear-gradient(135deg, #1B1B2F, #162447);
+}
+.admin-avatar-lg {
+  width: 50px; height: 50px; border-radius: 50%;
+  background: linear-gradient(135deg, #FF6B35, #E84118);
+  color: #fff; font-weight: 700; font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.admin-profile-info { min-width: 0; }
+.admin-profile-name-lg {
+  font-size: 16px; font-weight: 700; color: #fff; margin: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.admin-profile-phone {
+  font-size: 13px; color: rgba(255,255,255,0.6); margin: 4px 0 6px;
+}
+.admin-role-badge {
+  display: inline-block; font-size: 10px; font-weight: 700;
+  color: #FF6B35; background: rgba(255,107,53,0.15);
+  padding: 2px 10px; border-radius: 20px; text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.admin-profile-divider {
+  height: 1px; background: #E5E7EB; margin: 0;
+}
+.admin-profile-item {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 14px 20px; background: transparent; border: none;
+  font-size: 14px; font-weight: 500; color: #374151;
+  cursor: pointer; transition: all 0.2s; text-align: left;
+}
+.admin-profile-item:hover { background: #F9FAFB; }
+.admin-profile-item span { font-size: 18px; }
+.admin-profile-logout { color: #FF4757; }
+.admin-profile-logout:hover { background: #FFF5F5; }
+
+/* ─── Body Layout ─── */
+.admin-body {
+  display: flex; min-height: calc(100vh - 64px); margin-top: 64px;
 }
 
-.restaurant:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+/* ─── Sidebar ─── */
+.admin-sidebar {
+  width: 240px; background: #fff; border-right: 1px solid #E5E7EB;
+  padding: 24px 16px; flex-shrink: 0; position: sticky; top: 64px;
+  height: calc(100vh - 64px); overflow-y: auto;
+}
+.sidebar-section { margin-bottom: 28px; }
+.sidebar-label {
+  font-size: 11px; font-weight: 700; color: #9CA3AF;
+  text-transform: uppercase; letter-spacing: 1px; margin: 0 0 10px 8px;
+}
+.sidebar-item {
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+  border-radius: 10px; font-size: 14px; font-weight: 500; color: #374151;
+  cursor: pointer; transition: all 0.2s; text-decoration: none;
+}
+.sidebar-item:hover { background: #F3F4F6; }
+.sidebar-item.active {
+  background: #FFF0EB; color: #FF6B35; font-weight: 700;
+}
+.sidebar-item.add {
+  color: #FF6B35; font-weight: 600;
+}
+.sidebar-item.add:hover { background: #FFF0EB; }
+.sidebar-stats { margin-top: auto; }
+.sidebar-stat {
+  background: #F9FAFB; border-radius: 10px; padding: 14px;
+  margin-bottom: 10px; text-align: center;
+}
+.sidebar-stat .stat-value {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 28px; font-weight: 800; color: #1B1B2F;
+}
+.sidebar-stat .stat-name {
+  font-size: 12px; color: #9CA3AF; font-weight: 500; margin-top: 2px;
 }
 
-.hotelimg {
-    height: 160px;
-    width: 160px;
-    border-radius: 10px;
-    object-fit: cover;
-    margin-right: 25px;
-    border: 3px solid white;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+/* ─── Main Content ─── */
+.admin-main {
+  flex: 1; padding: 32px; min-width: 0;
+}
+.admin-main-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 28px; flex-wrap: wrap; gap: 16px;
+}
+.admin-main-header h1 {
+  font-family: 'Space Grotesk', sans-serif; font-size: 28px;
+  font-weight: 800; color: #1B1B2F; margin: 0;
+}
+.admin-main-header p { color: #6B7280; font-size: 14px; margin: 4px 0 0; }
+.admin-add-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 12px 24px; background: #FF6B35; color: #fff;
+  border: none; border-radius: 10px; font-size: 14px; font-weight: 700;
+  cursor: pointer; text-decoration: none; transition: all 0.25s;
+}
+.admin-add-btn:hover {
+  background: #E85D26; transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255,107,53,0.3);
 }
 
-.Arbg {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
+/* ─── Empty State ─── */
+.admin-empty-state {
+  text-align: center; padding: 80px 24px;
+  background: #fff; border-radius: 16px; border: 1px solid #E5E7EB;
 }
+.admin-empty-state h3 { font-size: 20px; color: #374151; margin: 16px 0 8px; }
+.admin-empty-state p { color: #6B7280; font-size: 15px; margin: 0 0 20px; }
 
-.resname {
-    color: #ff4757;
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 10px;
+/* ─── Restaurant Cards Grid ─── */
+.admin-rest-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 20px;
 }
-
-.restaurant-address {
-    color: #636e72;
-    font-size: 1rem;
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.admin-rest-card {
+  background: #fff; border-radius: 16px; padding: 24px;
+  border: 1px solid #E5E7EB; transition: all 0.3s;
 }
-
-.restaurant-address::before {
-    content: "📍";
+.admin-rest-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08); transform: translateY(-4px);
 }
-
-#imggrp {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-    overflow-x: auto;
-    padding: 10px 0;
+.arc-header { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 18px; }
+.arc-icon {
+  width: 52px; height: 52px; border-radius: 14px;
+  background: #FFF0EB; display: flex; align-items: center;
+  justify-content: center; font-size: 26px; flex-shrink: 0;
 }
-
-.restaurant-image {
-    height: 80px;
-    width: 80px;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 2px solid white;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+.arc-info { flex: 1; min-width: 0; }
+.arc-info h3 {
+  font-family: 'Space Grotesk', sans-serif; font-size: 18px;
+  font-weight: 700; color: #1B1B2F; margin: 0 0 4px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+.arc-address { font-size: 13px; color: #6B7280; margin: 0; }
 
-.action-buttons {
-    display: flex;
-    gap: 12px;
-    margin-top: 15px;
-    flex-wrap: wrap;
+.arc-stats {
+  display: flex; gap: 12px; margin-bottom: 18px;
+  padding: 14px 0; border-top: 1px solid #F3F4F6;
+  border-bottom: 1px solid #F3F4F6;
 }
-
-.resviewmenu, .resedit, .resdelet {
-    border: none;
-    outline: none;
-    background: linear-gradient(135deg, #ff4757, #ff3742);
-    height: 40px;
-    width: 140px;
-    border-radius: 8px;
-    color: white;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
+.arc-stat { flex: 1; text-align: center; }
+.arc-stat-val {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 18px; font-weight: 700; color: #1B1B2F; display: block;
 }
+.arc-stat-label { font-size: 11px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.5px; }
 
-.resviewmenu {
-    background: linear-gradient(135deg, #28a745, #20c997);
+.arc-actions { display: flex; gap: 8px; }
+.arc-btn {
+  flex: 1; padding: 9px 0; border-radius: 8px; font-size: 13px;
+  font-weight: 600; cursor: pointer; border: none; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
 }
+.arc-btn-view { background: #EFF6FF; color: #2563EB; }
+.arc-btn-view:hover { background: #DBEAFE; }
+.arc-btn-edit { background: #FFF0EB; color: #FF6B35; }
+.arc-btn-edit:hover { background: #FFE0D1; }
+.arc-btn-delete { background: #FEF2F2; color: #EF4444; }
+.arc-btn-delete:hover { background: #FEE2E2; }
 
-.resedit {
-    background: linear-gradient(135deg, #17a2b8, #6f42c1);
+/* ─── Hide old styles ─── */
+.restaurant, .AdminLogin, #artext2, #addRestaurant1, #addRestaurant2,
+#imggrp, .hotelimg, .resname, .resaddress, .Arbg,
+.resviewmenu, .resedit, .resdelet, .admin-nav { display: none !important; }
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  .admin-sidebar { display: none; }
+  .admin-main { padding: 20px; }
+  .admin-rest-grid { grid-template-columns: 1fr; }
 }
-
-.resviewmenu:hover {
-    background: linear-gradient(135deg, #20c997, #28a745);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
-}
-
-.resedit:hover {
-    background: linear-gradient(135deg, #6f42c1, #17a2b8);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(111, 66, 193, 0.4);
-}
-
-.resdelet:hover {
-    background: linear-gradient(135deg, #ff3742, #ff4757);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 71, 87, 0.4);
-}
-
-#addRestaurant1, #addRestaurant2 {
-    border: none;
-    outline: none;
-    background: linear-gradient(135deg, #ff4757, #ff3742);
-    color: white;
-    font-size: 16px;
-    font-weight: 600;
-    height: 50px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    padding: 0 30px;
-    margin: 15px;
-}
-
-#addRestaurant1:hover, #addRestaurant2:hover {
-    background: linear-gradient(135deg, #ff3742, #ff4757);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(255, 71, 87, 0.4);
-}
-
-.header-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
-    gap: 20px;
-}
-
-.stats-card {
-    background: linear-gradient(135deg, #ff4757, #ff3742);
-    color: white;
-    padding: 20px;
-    border-radius: 12px;
-    text-align: center;
-    min-width: 200px;
-}
-
-.stats-number {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 5px;
-}
-
-.stats-label {
-    font-size: 1rem;
-    opacity: 0.9;
-}
-
-#nores {
-    color: #ff4757;
-    text-align: center;
-    font-size: 1.5rem;
-    padding: 40px;
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+@media (max-width: 600px) {
+  .admin-topnav { padding: 0 16px; }
+  .admin-user-info { display: none; }
+  .admin-main-header { flex-direction: column; }
+  .arc-actions { flex-direction: column; }
 }

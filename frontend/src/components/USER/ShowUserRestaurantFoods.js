@@ -1,58 +1,72 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import '../CSS/Showusrrf.css'
+import UserLogin from './UserLogin';
+import { getFoodImage } from '../utils/foodImages';
 
 export default class ShowUserRestaurantFoods extends Component {
     constructor(props){
         super(props);
 
-        console.log("=== SHOW USER RESTAURANT FOODS CONSTRUCTOR ===");
-        console.log("Location state:", props.location?.state);
-
-        // 🛠 FIX: Safe data extraction
+        // Safe data extraction with sessionStorage fallback
         const state = props.location?.state || {};
         const orddata = state.orddata || {};
 
-        this.restaurantname = orddata.restaurantname || "Unknown Restaurant";
-        this.userPhoneNumber = state.phonenum || orddata.phonenumber || '';
-
-        // 🛠 FIX: Set restaurantId directly, not as obj
+        this.restaurantname = orddata.restaurantname || "";
+        this.userPhoneNumber = state.phonenum || orddata.phonenumber ||
+            localStorage.getItem('userPhoneNumber') || '';
         this.restaurantId = orddata.restaurantid;
 
-        console.log("📥 Extracted data:", {
-            restaurantId: this.restaurantId,
-            restaurantname: this.restaurantname,
-            userPhoneNumber: this.userPhoneNumber
-        });
+        // Save to sessionStorage for page refresh survival
+        if (this.restaurantId) {
+            sessionStorage.setItem('ff_current_restaurant', JSON.stringify({
+                restaurantid: this.restaurantId,
+                restaurantname: this.restaurantname
+            }));
+        } else {
+            // Try to recover from sessionStorage
+            try {
+                const saved = JSON.parse(sessionStorage.getItem('ff_current_restaurant'));
+                if (saved) {
+                    this.restaurantId = saved.restaurantid;
+                    this.restaurantname = saved.restaurantname || "Restaurant";
+                }
+            } catch(e) {}
+        }
+
+        if (!this.restaurantname) this.restaurantname = "Restaurant";
 
         // Initialize state based on whether we have data
         if (!this.restaurantId) {
-            console.error("❌ No restaurant ID found");
             this.state = {
-                error: "No restaurant data provided. Please go back and select a restaurant.",
+                error: "No restaurant selected. Please go back and pick a restaurant.",
                 loading: false,
-                listOfFoods: []
+                listOfFoods: [],
+                selectedItems: new Set()
             };
         } else {
             this.state = {
                 loading: true,
                 listOfFoods: null,
-                error: null
+                error: null,
+                selectedItems: new Set()
             };
         }
 
-        // 🛠 FIX: Initialize order object safely
+        // 🛠 FIX: Preserve existing order items if coming from "Add More"
+        const existingOrder = orddata.fooditemid ? orddata : null;
         this.order = {
             restaurantid: this.restaurantId,
             restaurantname: this.restaurantname,
             phonenumber: this.userPhoneNumber,
-            deliveryaddress: null,
+            deliveryaddress: orddata.deliveryaddress || null,
             totalamount: 0,
-            fooditemid: [],
-            foodname: [],
-            amount: [],
-            quantity: []
+            fooditemid: existingOrder ? [...(existingOrder.fooditemid || [])] : [],
+            foodname: existingOrder ? [...(existingOrder.foodname || [])] : [],
+            amount: existingOrder ? [...(existingOrder.amount || [])] : [],
+            quantity: existingOrder ? [...(existingOrder.quantity || [])] : []
         };
+        this.isAddMore = !!(existingOrder && existingOrder.fooditemid && existingOrder.fooditemid.length > 0);
     }
 
     componentDidMount() {
@@ -75,7 +89,7 @@ export default class ShowUserRestaurantFoods extends Component {
 
         console.log("📤 Fetching foods for restaurant:", requestData);
 
-        axios.post("http://localhost:8080/zomato/user/get-fooditems", requestData)
+        axios.post("http://localhost:9090/zomato/user/get-fooditems", requestData)
             .then((resp)=>{
                 console.log("✅ Food items response:", resp.data);
 
@@ -107,25 +121,32 @@ export default class ShowUserRestaurantFoods extends Component {
             return;
         }
 
-        // Reset order arrays
-        this.order.fooditemid = [];
-        this.order.foodname = [];
-        this.order.amount = [];
-        this.order.quantity = [];
+        // Keep existing items (from "Add More"), then add newly selected items
+        const existingIds = new Set(this.order.fooditemid.map(String));
+        let newItemsAdded = 0;
 
-        // Collect selected items
+        // Collect newly selected items (skip duplicates already in order)
         this.state.listOfFoods.forEach((value, index) => {
             const checkbox = document.getElementById('select' + index);
             if (checkbox && checkbox.checked === true) {
-                this.order.fooditemid.push(String(value.fooditemid || value.foodItemId));
-                this.order.foodname.push(String(value.foodname || value.foodName));
-                this.order.amount.push(String(value.price));
-                this.order.quantity.push("1");
+                const itemId = String(value.fooditemid || value.foodItemId);
+                if (!existingIds.has(itemId)) {
+                    this.order.fooditemid.push(itemId);
+                    this.order.foodname.push(String(value.foodname || value.foodName));
+                    this.order.amount.push(String(value.price));
+                    this.order.quantity.push("1");
+                    newItemsAdded++;
+                }
             }
         });
 
         if (this.order.fooditemid.length === 0) {
             alert("Please select at least one food item to order");
+            return;
+        }
+
+        if (this.isAddMore && newItemsAdded === 0) {
+            alert("Please select new items to add, or go back to your order");
             return;
         }
 
@@ -150,68 +171,111 @@ export default class ShowUserRestaurantFoods extends Component {
         });
     };
 
+    handleCheckboxChange = (index) => {
+        const checkbox = document.getElementById('select' + index);
+        const card = checkbox?.parentElement;
+
+        if (checkbox?.checked) {
+            this.state.selectedItems.add(index);
+            if (card) card.classList.add('selected');
+        } else {
+            this.state.selectedItems.delete(index);
+            if (card) card.classList.remove('selected');
+        }
+        this.setState({});
+    };
+
     render() {
         const { listOfFoods, loading, error } = this.state;
 
-        // Show error state
         if (error) {
             return (
-                <div className='AdminCheckFood'>
-                    <h1>Menu</h1>
-                    <p>{error}</p>
-                    <button onClick={this.back}>← Go Back to Restaurants</button>
-                </div>
+                <>
+                    <UserLogin phh={this.userPhoneNumber} />
+                    <div className='Addmorewindow' style={{textAlign:'center',paddingTop:'80px'}}>
+                        <h2>Menu</h2>
+                        <p style={{color:'#6B7280',margin:'16px 0'}}>{error}</p>
+                        <button onClick={this.back} className="ff-btn ff-btn-primary">← Back to Restaurants</button>
+                    </div>
+                </>
             );
         }
 
-        // Show loading state
         if (loading) {
             return (
-                <div className='AdminCheckFood'>
-                    <h1>{this.restaurantname}</h1>
-                    <p>Loading food items...</p>
-                </div>
+                <>
+                    <UserLogin phh={this.userPhoneNumber} />
+                    <div className='Addmorewindow' style={{textAlign:'center',paddingTop:'80px'}}>
+                        <div className="ff-spinner"></div>
+                        <p style={{marginTop:'16px',color:'#6B7280'}}>Loading menu...</p>
+                    </div>
+                </>
             );
         }
 
-        // Show no foods state
         if (!listOfFoods || listOfFoods.length === 0) {
             return (
-                <div className='AdminCheckFood'>
-                    <h1>{this.restaurantname}</h1>
-                    <p>No food items available</p>
-                    <button onClick={this.back}>← Go Back to Restaurants</button>
-                </div>
+                <>
+                    <UserLogin phh={this.userPhoneNumber} />
+                    <div className='Addmorewindow' style={{textAlign:'center',paddingTop:'80px'}}>
+                        <h2>{this.restaurantname}</h2>
+                        <p style={{color:'#6B7280',margin:'16px 0'}}>No food items available</p>
+                        <button onClick={this.back} className="ff-btn ff-btn-primary">← Back to Restaurants</button>
+                    </div>
+                </>
             );
         }
 
-        // Show foods list
         return (
             <>
-                <div id="Adlogback"></div>
-                <div id="Admintag">
-                    <img src='../IMAGES/Userpic.png' alt='User profile' onClick={this.back}></img>
-                    <p>USER</p>
-                </div>
-                <img src="../IMAGES/Home.png" alt="Home" className='Home' onClick={this.back}></img>
+                <UserLogin phh={this.userPhoneNumber} />
                 <div className='Addmorewindow'>
-                    <h1 id="artext6">Restaurant : {this.restaurantname}</h1>
+                    <h1 id="artext6">{this.restaurantname}</h1>
+                    <p style={{textAlign:'center',color:'#6B7280',marginBottom:'24px',fontSize:'15px'}}>Select items to add to your order</p>
                     <div className='SMFlist'>
-                        {listOfFoods.map((value, index) => (
-                            <div className="restaurant1" key={value.fooditemid || value.foodItemId || index}
-                                 id={value.fooditemid || value.foodItemId}>
-                                <div id="fooddata">
-                                    <p>Dish : {value.foodname || value.foodName}</p>
-                                    <p>Price : Rs.{value.price}/-</p>
-                                    <p className='Description'>Description : {value.description}</p>
-                                    <p>Rating : {value.fooditemrating ? value.fooditemrating.toPrecision(2) + " / 5" : "No ratings"}</p>
+                        {listOfFoods.map((value, index) => {
+                            const foodName = value.foodname || value.foodName || '';
+                            // Always use smart image based on food name
+                            const imageSrc = getFoodImage(foodName, index);
+
+                            const foodId = value.fooditemid || value.foodItemId;
+                            const isSelected = this.state.selectedItems.has(index);
+                            return (
+                                <div className={`restaurant1${isSelected ? ' selected' : ''}`}
+                                     key={foodId || index}
+                                     id={foodId}
+                                     onClick={() => {
+                                         const checkbox = document.getElementById('select' + index);
+                                         if (checkbox) {
+                                             checkbox.checked = !checkbox.checked;
+                                             this.handleCheckboxChange(index);
+                                         }
+                                     }}>
+                                    <img
+                                        src={imageSrc}
+                                        alt={foodName}
+                                        className='Checkfood'
+                                        onError={(e) => { e.target.src = getFoodImage('', index); }}
+                                    />
+                                    <div id="fooddata">
+                                        <p>{foodName}</p>
+                                        <p>₹{value.price}</p>
+                                        <p className='Description'>{value.description || "Freshly prepared"}</p>
+                                        <p>★ {(value.foodItemRating || value.fooditemrating) ? (value.foodItemRating || value.fooditemrating).toFixed(1) : "New"}</p>
+                                    </div>
+                                    <label htmlFor={'select' + index} id="selectfood">
+                                        {isSelected ? '✓ Added' : '+ Add'}
+                                    </label>
+                                    <input
+                                        type="checkbox"
+                                        id={'select' + index}
+                                        className='selectedfoodc'
+                                        onChange={() => this.handleCheckboxChange(index)}
+                                    />
                                 </div>
-                                <img src={value.image} alt={value.foodname || value.foodName} className='Checkfood'></img>
-                                <label htmlFor={'select' + index} id="selectfood">Select</label>
-                                <input type="checkbox" id={'select' + index} className='selectedfoodc'></input>
-                            </div>
-                        ))}
-                        <button id='orderFoods' onClick={this.orderFoods}>Order Foods</button>
+                            );
+                        })}
+                        <button id='orderFoods' onClick={this.orderFoods}>Place Order →</button>
                     </div>
                 </div>
             </>

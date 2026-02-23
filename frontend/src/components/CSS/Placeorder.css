@@ -1,142 +1,84 @@
-.PlaceOrder
-{
-    position: absolute;
+/* ===== PLACE ORDER PAGE ===== */
+.PlaceOrder {
+  min-height: 100vh; background: var(--ff-bg);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: calc(var(--ff-nav-height) + 24px) 24px 80px;
 }
-.PlaceOrder
-{
-    position: absolute;
-    height:84%;
-    background-color: rgba(255, 255, 255, 0.7);
-    width: 30%;
-    left:35%;
-    border-radius: 20px;
-    top:8%;
+.order-container {
+  width: 100%; max-width: 560px;
+  background: var(--ff-card); border-radius: var(--ff-radius-xl);
+  padding: 36px 32px; box-shadow: var(--ff-shadow);
+  border: 1px solid var(--ff-border-light);
+  animation: fadeIn 0.4s ease;
 }
-.orderimg
-{
-    height:190px;
-    width: 190px;
-    border-radius: 7px;
-    position: absolute;
-    left:135px;
-}
-.FoodItem
-{
-    position: relative;
-    color: rgba(239,79,95,1);
-    border-radius: 10px;
-    font-size: 18px;
-    left:50px;
-    width: 280px;
-}
-.Totalamt
-{
-    position: absolute;
-    top:380px;
-    left:45px;
-    color: rgba(239,79,95,1);
-    background-color: rgba(255, 255, 255, 0.7);
-    padding: 10px;
-    font-size: 25px;
-    width: 350px;
-    border-radius: 9px;
-    text-align: center;
+.order-header h2 { font-family: var(--ff-font-heading); font-size: 28px; font-weight: 700; }
+.order-header p { color: var(--ff-text-secondary) !important; }
 
+.orderimg {
+  width: 100%; height: 180px; object-fit: cover;
+  border-radius: var(--ff-radius); margin-bottom: 24px;
+}
 
+.Orderform { display: flex; flex-direction: column; gap: 0; }
+.FoodItem {
+  display: grid; grid-template-columns: 1fr auto auto;
+  align-items: center; gap: 12px;
+  padding: 16px 0; border-bottom: 1px solid var(--ff-border-light);
 }
-#deliveryAddress
-{
-    position: absolute;
-    outline: none;
-    border: none;
-    background-color: rgba(239, 79, 96, 0.6);
-    position: absolute;
-    color: rgba(255, 255, 255, 0.9);
-    padding-left: 20px;
-    left: 45px;
-    border-radius: 9px;
-    font-size: 20px;
-    top:470px;
-    height: 30px;
-    width: 350px;
-    padding: 10px;
-    font-size: 25px;
-}
-#addmore,#ordsub
-{
-    border: none;
-    outline: none;
-    background-color:  rgba(239,79,95,1);
-    position: absolute;
-    top:540px;
-    height: 30px;
-    width: 180px;
-    border-radius: 12px;
-    color:rgba(255, 255, 255, 0.9);
-    font-size: 20px;
-    left:45px;
-    height: 40px;
-}
-#ordsub
-{
-    left: 235px;
-}
-.ordi,.ordd
-{
-    border: none;
-    outline: none;
-    background-color: rgba(239,79,95,1);
-    height: 30px;
-    width: 30px;
-    font-size: 25px;
-    margin: 5px;
-    border-radius: 30px;
-    text-align: center;
-    color: rgba(255, 255, 255, 0.7);
-}
-.Orderform
-{
-    background-color: rgba(255, 255, 255, 0.7);
-    position: absolute;
-    height: max-content;
-    width: 370px;
-    left:45px;
-    height: 270px;
-    overflow-y: scroll;
-    border-radius: 10px;
-    top:70px;
-    padding-top:50px;
-    color: rgba(239, 79, 96, 0.6);
-}
-.ordqntl,.ordi,.ordd,.ordqnt
-{
-    position: relative;
-    bottom: 35px;
-    
-}
-.ordqnt
-{
-    outline: none;
-    border: none;
-    background-color: rgba(239, 79, 96, 0.6);
-    padding-top: 4px;
-    height: 25px;
-    width: 100px;
-    bottom: 37px;
-    border-radius: 20px;
-    text-align: center;
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 18px;
-}
-.Orddishname,.Orddishprice
-{
-    position: relative;
-    bottom: 20px;
-    width: max-content;
-    color: rgba(239, 79, 96, 1);
-}
-.ordqntl
-{
-    color: rgba(239, 79, 96, 1);
+.Orddishname { font-size: 15px; font-weight: 600; color: var(--ff-text); margin: 0; }
+.Orddishprice { font-size: 15px; font-weight: 700; color: var(--ff-primary); margin: 0; white-space: nowrap; }
+.ordqntl { display: none; }
 
+.quantity-controls {
+  display: flex; align-items: center; gap: 0;
+  border: 2px solid var(--ff-border); border-radius: var(--ff-radius-sm);
+  overflow: hidden;
+}
+.ordd, .ordi {
+  width: 36px; height: 36px; display: flex; align-items: center;
+  justify-content: center; background: var(--ff-border-light);
+  border: none; font-size: 18px; font-weight: 700;
+  color: var(--ff-text-secondary); cursor: pointer;
+  transition: var(--ff-transition);
+}
+.ordd:hover, .ordi:hover { background: var(--ff-primary-light); color: var(--ff-primary); }
+.ordqnt {
+  width: 40px; height: 36px; text-align: center; border: none;
+  font-size: 15px; font-weight: 700; background: #fff;
+  -moz-appearance: textfield;
+}
+.ordqnt::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+.Totalamt {
+  font-family: var(--ff-font-heading); font-size: 22px; font-weight: 700;
+  text-align: right; padding: 20px 0 16px; color: var(--ff-text);
+}
+
+#deliveryAddress {
+  width: 100%; padding: 14px 18px; border: 2px solid var(--ff-border);
+  border-radius: var(--ff-radius); font-size: 15px; margin-bottom: 20px;
+  transition: var(--ff-transition);
+}
+#deliveryAddress:focus { border-color: var(--ff-primary); box-shadow: 0 0 0 4px rgba(255,107,53,0.1); }
+
+.order-actions { display: flex; gap: 12px; }
+#addmore {
+  flex: 1; padding: 14px; background: transparent;
+  border: 2px solid var(--ff-border); border-radius: var(--ff-radius);
+  font-size: 15px; font-weight: 600; color: var(--ff-text);
+  cursor: pointer; transition: var(--ff-transition);
+}
+#addmore:hover { border-color: var(--ff-primary); color: var(--ff-primary); }
+#ordsub {
+  flex: 1; padding: 14px; background: var(--ff-accent);
+  border: none; border-radius: var(--ff-radius);
+  font-size: 15px; font-weight: 700; color: #fff;
+  cursor: pointer; transition: var(--ff-transition);
+}
+#ordsub:hover { background: var(--ff-accent-dark); transform: translateY(-2px); }
+
+@media (max-width: 480px) {
+  .order-container { padding: 24px 20px; }
+  .FoodItem { grid-template-columns: 1fr; gap: 8px; }
+  .order-actions { flex-direction: column; }
 }

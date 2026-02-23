@@ -10,262 +10,252 @@ class AdminLogin extends Component {
         this.state = {
             listOfRest: [],
             loading: true,
-            error: null
+            error: null,
+            profileOpen: false,
+            adminName: '',
+            adminPhone: ''
         };
-
-
-        this.handleRestaurantAdded = this.handleRestaurantAdded.bind(this);
     }
 
     componentDidMount() {
         this.fetchRestaurants();
+        // Fetch admin profile
+        if (this.phone) {
+            axios.post("http://localhost:9090/zomato/user/get-profile", { phonenumber: this.phone })
+                .then((resp) => {
+                    if (resp.data && resp.data.name) {
+                        this.setState({ adminName: resp.data.name, adminPhone: resp.data.phone });
+                    }
+                })
+                .catch(() => {});
+        }
     }
 
     fetchRestaurants = () => {
-        console.log("🔄 Loading restaurants...");
-        axios
-            .get('http://localhost:8080/zomato/get-restaurants')
+        this.setState({ loading: true, error: null });
+        axios.get('http://localhost:9090/zomato/get-restaurants')
             .then((resp) => {
-                console.log("📊 Restaurants data:", resp.data);
-                this.setState({
-                    listOfRest: resp.data,
-                    loading: false
-                });
+                this.setState({ listOfRest: resp.data || [], loading: false });
             })
-            .catch((err) => {
-                console.error("❌ Error fetching restaurants:", err);
-                this.setState({
-                    loading: false,
-                    error: "Failed to load restaurants"
-                });
+            .catch(() => {
+                this.setState({ loading: false, error: "Failed to load restaurants" });
             });
     };
 
-    // 🔥 FIX: This method is now bound in constructor
-    handleRestaurantAdded() {
-        console.log("🆕 Restaurant added, refreshing list...");
-        this.fetchRestaurants(); // Refresh the list
-    }
-
     checkFoods = (restaurantId) => {
-        console.log("View Menu clicked for:", restaurantId);
-        this.props.history.push({
-            pathname: '/Viewmenu',
-            state: { resid: restaurantId }
-        });
+        this.props.history.push({ pathname: '/Viewmenu', state: { resid: restaurantId } });
     };
 
     editRestaurant = (restaurantId) => {
-        console.log("Edit clicked for:", restaurantId);
-        const restaurant = this.state.listOfRest.find(
-            (rest) => rest.restaurantId === restaurantId
-        );
-
-        console.log("Restaurant to edit:", restaurant);
-
-        this.props.history.push({
-            pathname: '/Edit',
-            state: {
-                resid: restaurantId,
-                resobj: restaurant
-            }
-        });
+        const restaurant = this.state.listOfRest.find(r => r.restaurantId === restaurantId);
+        this.props.history.push({ pathname: '/Edit', state: { resid: restaurantId, resobj: restaurant } });
     };
 
     deleteRestaurant = (restaurantId) => {
-        console.log("Delete clicked for:", restaurantId);
-        if (!window.confirm("Are you sure you want to delete this restaurant?")) {
-            return;
-        }
-
-        axios
-            .post('http://localhost:8080/zomato/admin/delete-restaurant', {
-                restaurantId: Number(restaurantId),
-            })
-            .then((resp) => {
-                console.log("✅ Delete success:", resp.data);
-                this.fetchRestaurants(); // Refresh after delete
-            })
-            .catch((err) => {
-                console.error("❌ Delete error:", err);
-                alert("Failed to delete restaurant");
-            });
-    };
-
-    back = () => {
-        this.props.history.push({ pathname: '/Admin' });
+        if (!window.confirm("Are you sure you want to delete this restaurant and all its food items?")) return;
+        axios.post('http://localhost:9090/zomato/admin/delete-restaurant', { restaurantId: Number(restaurantId) })
+            .then(() => this.fetchRestaurants())
+            .catch(() => alert("Failed to delete restaurant"));
     };
 
     logout = () => {
-        axios
-            .post('http://localhost:8080/zomato/user/logout', { phonenumber: this.phone })
-            .then((resp) => console.log(resp.data))
-            .catch((err) => console.log(err.message));
+        axios.post('http://localhost:9090/zomato/user/logout', { phonenumber: this.phone }).catch(() => {});
+        localStorage.removeItem('ap');
         this.props.history.push('/');
+    };
+
+    toggleProfile = () => {
+        this.setState(prev => ({ profileOpen: !prev.profileOpen }));
+    };
+
+    forgotPassword = () => {
+        this.setState({ profileOpen: false });
+        this.props.history.push('/Forgotpassword');
+    };
+
+    getInitials = (name) => {
+        if (!name) return 'A';
+        const parts = name.trim().split(' ');
+        if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+        return parts[0][0].toUpperCase();
+    };
+
+    getRestaurantIcon = (name) => {
+        const n = (name || '').toLowerCase();
+        if (n.includes('pizza')) return '🍕';
+        if (n.includes('burger')) return '🍔';
+        if (n.includes('cafe') || n.includes('coffee') || n.includes('mocha')) return '☕';
+        if (n.includes('sushi') || n.includes('japanese')) return '🍣';
+        if (n.includes('tandoori') || n.includes('indian') || n.includes('biryani') || n.includes('nawab')) return '🍛';
+        if (n.includes('chinese') || n.includes('dragon') || n.includes('wok') || n.includes('noodle')) return '🥡';
+        if (n.includes('dosa') || n.includes('south') || n.includes('spice')) return '🥘';
+        if (n.includes('barn')) return '🍔';
+        return '🍽️';
     };
 
     render() {
         const { listOfRest, loading, error } = this.state;
-
-        if (loading) {
-            return (
-                <div className="AdminLogin">
-                    <p>Loading restaurants...</p>
-                </div>
-            );
-        }
-
-        if (error) {
-            return (
-                <div className="AdminLogin">
-                    <p>Error: {error}</p>
-                    <button onClick={this.fetchRestaurants}>Retry</button>
-                </div>
-            );
-        }
+        const totalFoods = listOfRest.reduce((sum, r) => sum + (r.foodItems ? r.foodItems.length : 0), 0);
 
         return (
-            <>
-                <div id="Adlogback"></div>
-                <div id="Admintag">
-                    <img src="../IMAGES/Adminic.png" alt="Admin Icon" />
-                    <p>ADMIN DASHBOARD</p>
-                </div>
-                <img src="../IMAGES/Home.png" alt="Home" className="Home" onClick={this.back} />
-                <img src="../IMAGES/Logout.png" alt="Logout" className="Logout" onClick={this.logout} />
+            <div className="admin-dashboard">
+                {/* ─── Top Nav ─── */}
+                <nav className="admin-topnav">
+                    <div className="admin-topnav-left">
+                        <span className="admin-logo-icon">🚀</span>
+                        <span className="admin-logo-text">FlavourFleet</span>
+                        <span className="admin-badge">Admin Panel</span>
+                    </div>
+                    <div className="admin-topnav-right">
+                        <div className="admin-profile-wrapper">
+                            <button className="admin-profile-btn" onClick={this.toggleProfile}>
+                                <div className="admin-avatar">{this.getInitials(this.state.adminName)}</div>
+                                <span className="admin-profile-name">{this.state.adminName ? this.state.adminName.split(' ')[0] : 'Admin'}</span>
+                                <span className="admin-profile-arrow">{this.state.profileOpen ? '▲' : '▼'}</span>
+                            </button>
 
-                <div className="AdminLogin" style={{padding: '20px', marginTop: '100px'}}>
-                    {listOfRest.length === 0 ? (
-                        <>
-                            <p id="artext2">No restaurants available</p>
-                            {/*  FIX: Use regular Link without passing function */}
-                            <Link to="/Addrestaurant">
-                                <button id="addRestaurant2">Add Restaurant</button>
-                            </Link>
-                        </>
-                    ) : (
-                        <>
-                            <p id="artext2">Available Restaurants ({listOfRest.length})</p>
-                            {listOfRest.map((rest, index) => {
-                                const restaurantId = rest.restaurantId;
-                                const restaurantName = rest.restaurantName;
-                                const restaurantAddress = rest.restaurantAddress;
-
-                                console.log("🍴 Restaurant data:", {
-                                    id: restaurantId,
-                                    name: restaurantName,
-                                    address: restaurantAddress
-                                });
-
-                                return (
-                                    <div
-                                        className="restaurant"
-                                        key={restaurantId}
-                                        style={{
-                                            border: '2px solid #ccc',
-                                            padding: '15px',
-                                            margin: '10px',
-                                            borderRadius: '8px',
-                                            background: 'white'
-                                        }}
-                                    >
-                                        <div className="resname" style={{fontSize: '20px', fontWeight: 'bold'}}>
-                                            {restaurantName}
+                            {this.state.profileOpen && (
+                                <>
+                                    <div className="admin-profile-overlay" onClick={this.toggleProfile}></div>
+                                    <div className="admin-profile-dropdown">
+                                        <div className="admin-profile-dropdown-header">
+                                            <div className="admin-avatar-lg">{this.getInitials(this.state.adminName)}</div>
+                                            <div className="admin-profile-info">
+                                                <p className="admin-profile-name-lg">{this.state.adminName || 'Admin'}</p>
+                                                <p className="admin-profile-phone">📱 +91 {this.state.adminPhone || this.phone}</p>
+                                                <span className="admin-role-badge">Admin</span>
+                                            </div>
                                         </div>
-                                        <div className="resaddress" style={{margin: '5px 0'}}>
-                                            Address: {restaurantAddress}
-                                        </div>
-                                        <div className="Arbg" style={{margin: '10px 0'}}>
-                                            <button
-                                                onClick={() => this.checkFoods(restaurantId)}
-                                                className="resviewmenu"
-                                                style={{
-                                                    background: '#4CAF50',
-                                                    color: 'white',
-                                                    border: 'none',
-                                                    padding: '8px 15px',
-                                                    margin: '5px',
-                                                    borderRadius: '4px',
-                                                    cursor: 'pointer'
-                                                }}
-                                            >
-                                                View Menu
-                                            </button>
-                                            <button
-                                                onClick={() => this.editRestaurant(restaurantId)}
-                                                className="resedit"
-                                                style={{
-                                                    background: '#FF9800',
-                                                    color: 'white',
-                                                    border: 'none',
-                                                    padding: '8px 15px',
-                                                    margin: '5px',
-                                                    borderRadius: '4px',
-                                                    cursor: 'pointer'
-                                                }}
-                                            >
-                                                Edit Restaurant
-                                            </button>
-                                            <button
-                                                onClick={() => this.deleteRestaurant(restaurantId)}
-                                                className="resdelet"
-                                                style={{
-                                                    background: '#f44336',
-                                                    color: 'white',
-                                                    border: 'none',
-                                                    padding: '8px 15px',
-                                                    margin: '5px',
-                                                    borderRadius: '4px',
-                                                    cursor: 'pointer'
-                                                }}
-                                            >
-                                                Delete Restaurant
-                                            </button>
-                                        </div>
-                                        <div id="imggrp" style={{display: 'flex', overflowX: 'auto'}}>
-                                            {rest.restaurantImages && rest.restaurantImages.length > 0 ? (
-                                                rest.restaurantImages.map((image, imgIndex) => (
-                                                    <img
-                                                        src={image.link}
-                                                        key={image.imageId || `img-${imgIndex}`}
-                                                        alt={restaurantName}
-                                                        className="hotelimg"
-                                                        style={{
-                                                            width: '100px',
-                                                            height: '80px',
-                                                            objectFit: 'cover',
-                                                            margin: '5px',
-                                                            borderRadius: '4px'
-                                                        }}
-                                                    />
-                                                ))
-                                            ) : (
-                                                <p>No images available</p>
-                                            )}
-                                        </div>
+                                        <div className="admin-profile-divider"></div>
+                                        <button className="admin-profile-item" onClick={this.forgotPassword}>
+                                            <span>🔑</span> Change Password
+                                        </button>
+                                        <div className="admin-profile-divider"></div>
+                                        <button className="admin-profile-item admin-profile-logout" onClick={this.logout}>
+                                            <span>🚪</span> Logout
+                                        </button>
                                     </div>
-                                );
-                            })}
-                            {/* FIX: Use regular Link without passing function */}
-                            <Link to="/Addrestaurant">
-                                <button id="addRestaurant1" style={{
-                                    background: '#2196F3',
-                                    color: 'white',
-                                    border: 'none',
-                                    padding: '10px 20px',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    marginTop: '20px'
-                                }}>
-                                    ADD RESTAURANT
-                                </button>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </nav>
+
+                <div className="admin-body">
+                    {/* ─── Sidebar ─── */}
+                    <aside className="admin-sidebar">
+                        <div className="sidebar-section">
+                            <p className="sidebar-label">Dashboard</p>
+                            <div className="sidebar-item active">
+                                <span>🏪</span> Restaurants
+                            </div>
+                        </div>
+                        <div className="sidebar-section">
+                            <p className="sidebar-label">Actions</p>
+                            <Link to="/Addrestaurant" className="sidebar-item add">
+                                <span>➕</span> Add Restaurant
                             </Link>
-                        </>
-                    )}
+                        </div>
+                        <div className="sidebar-section sidebar-stats">
+                            <p className="sidebar-label">Overview</p>
+                            <div className="sidebar-stat">
+                                <div className="stat-value">{listOfRest.length}</div>
+                                <div className="stat-name">Restaurants</div>
+                            </div>
+                            <div className="sidebar-stat">
+                                <div className="stat-value">{totalFoods}</div>
+                                <div className="stat-name">Food Items</div>
+                            </div>
+                        </div>
+                    </aside>
+
+                    {/* ─── Main Content ─── */}
+                    <main className="admin-main">
+                        <div className="admin-main-header">
+                            <div>
+                                <h1>Restaurants</h1>
+                                <p>Manage your restaurants and their menus</p>
+                            </div>
+                            <Link to="/Addrestaurant" className="admin-add-btn">
+                                + Add Restaurant
+                            </Link>
+                        </div>
+
+                        {loading ? (
+                            <div className="admin-empty-state">
+                                <div className="ff-spinner"></div>
+                                <p>Loading restaurants...</p>
+                            </div>
+                        ) : error ? (
+                            <div className="admin-empty-state">
+                                <span style={{fontSize:'48px'}}>⚠️</span>
+                                <h3>{error}</h3>
+                                <button onClick={this.fetchRestaurants} className="admin-add-btn">Retry</button>
+                            </div>
+                        ) : listOfRest.length === 0 ? (
+                            <div className="admin-empty-state">
+                                <span style={{fontSize:'64px'}}>🏪</span>
+                                <h3>No restaurants yet</h3>
+                                <p>Start by adding your first restaurant</p>
+                                <Link to="/Addrestaurant" className="admin-add-btn">+ Add Restaurant</Link>
+                            </div>
+                        ) : (
+                            <div className="admin-rest-grid">
+                                {listOfRest.map((rest) => {
+                                    const id = rest.restaurantId;
+                                    const foodCount = rest.foodItems ? rest.foodItems.length : 0;
+                                    const rating = rest.restaurantRating ? rest.restaurantRating.toFixed(1) : '—';
+                                    const icon = this.getRestaurantIcon(rest.restaurantName);
+
+                                    return (
+                                        <div className="admin-rest-card" key={id}>
+                                            <div className="arc-header">
+                                                <div className="arc-icon">{icon}</div>
+                                                <div className="arc-info">
+                                                    <h3>{rest.restaurantName}</h3>
+                                                    <p className="arc-address">📍 {rest.restaurantAddress}</p>
+                                                </div>
+                                            </div>
+                                            <div className="arc-stats">
+                                                <div className="arc-stat">
+                                                    <span className="arc-stat-val">{foodCount}</span>
+                                                    <span className="arc-stat-label">Items</span>
+                                                </div>
+                                                <div className="arc-stat">
+                                                    <span className="arc-stat-val">{rating}</span>
+                                                    <span className="arc-stat-label">Rating</span>
+                                                </div>
+                                                <div className="arc-stat">
+                                                    <span className="arc-stat-val">#{id}</span>
+                                                    <span className="arc-stat-label">ID</span>
+                                                </div>
+                                            </div>
+                                            <div className="arc-actions">
+                                                <button className="arc-btn arc-btn-view" onClick={() => this.checkFoods(id)}>
+                                                    👁️ View Menu
+                                                </button>
+                                                <button className="arc-btn arc-btn-edit" onClick={() => this.editRestaurant(id)}>
+                                                    ✏️ Edit
+                                                </button>
+                                                <button className="arc-btn arc-btn-delete" onClick={() => this.deleteRestaurant(id)}>
+                                                    🗑️ Delete
+                                                </button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </main>
                 </div>
-            </>
+            </div>
         );
     }
 }
 
 export default withRouter(AdminLogin);
+
+
+
+
+

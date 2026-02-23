@@ -1,72 +1,104 @@
-.Addmorewindow
-{
-    position: absolute;
-    height:550px;
-    overflow-y: scroll;
-    background-color: rgba(255, 255, 255, 0.5);
-    padding: 50px;
-    width: 500px;
-    left:475px;
-    border-radius: 20px;
-    top:35px;
+/* ===== USER RESTAURANT FOODS / MENU PAGE ===== */
+
+/* Hide old background elements */
+#Adlogback, #Admintag, .Home { display: none !important; }
+
+.Addmorewindow {
+  min-height: 100vh; background: var(--ff-bg);
+  padding: calc(var(--ff-nav-height) + 24px) 24px 100px;
 }
-#artext6
-{
-    position: absolute;
-    color: rgba(239,79,95,1);
-    font-size: 25px;
-    letter-spacing: 1px;
-    background-color: rgba(255, 255, 255, 0.7);
-    width: max-content;
-    text-align: center;
-    height: 35px;
-    padding-top: 4px;
-    border-radius: 15px;
-    top:10px;
-    padding-left: 15px;
-    padding-right: 15px;
+
+/* Header */
+#artext6 {
+  font-family: var(--ff-font-heading); font-size: 28px; font-weight: 700;
+  color: var(--ff-text); text-align: center; padding: 24px 0 8px;
+  margin: 0 0 8px;
+  background: none !important;
 }
-.SMFlist
-{
-    position: absolute;
-    top:90px;
+#artext6::before { display: none; }
+
+/* Menu Items List */
+.SMFlist {
+  max-width: 1000px; margin: 0 auto;
+  display: flex; flex-direction: column; gap: 16px;
 }
-#orderFoods
-{
-    border: none;
-    outline: none;
-    background-color:  rgba(239,79,95,1);
-    position: relative;
-    top:0px;
-    left: 150px;
-    width: 200px;
-    font-size: 20px;
-    height: 40px;
-    margin-bottom: 50px;
-    color: rgba(255, 255, 255, 0.9);
-    border-radius: 10px;
+
+/* Restaurant Card */
+.restaurant1 {
+  display: grid; grid-template-columns: 140px 1fr auto;
+  align-items: center; gap: 0;
+  background: var(--ff-card); border-radius: var(--ff-radius-lg);
+  border: 1px solid var(--ff-border-light); overflow: hidden;
+  transition: var(--ff-transition);
 }
-.selectedfoodc
-{
-    -webkit-appearance: none;
-    appearance: none;
-    height: 18px;
-    width: 18px;
-    border: 2px solid rgba(0,0,0,0.3);
-    border-radius: 4px;
-    position: absolute;
-    top:152px;
-    left: 70px;
+.restaurant1:hover { box-shadow: var(--ff-shadow); transform: translateY(-2px); }
+
+/* Food Image */
+.Checkfood {
+  width: 140px; height: 120px; object-fit: cover;
+  background: linear-gradient(135deg, #fef3ef, #fde8e0);
 }
-.selectedfoodc:checked
-{
-    background-color: rgba(239,79,95,0.5);
-    border-color: rgba(239,79,95,1);
+
+/* Food Data Container */
+#fooddata {
+  padding: 16px 20px; display: flex; flex-direction: column; gap: 4px;
 }
-#selectfood
-{
-    position: absolute;
-    left: 25px;
-    color: rgba(239,79,95,1);
-    top:156px;
+#fooddata p { margin: 0; }
+#fooddata p:first-child { font-size: 16px; font-weight: 700; color: var(--ff-text); }
+#fooddata p:nth-child(2) { font-size: 18px; font-weight: 800; color: var(--ff-primary); }
+#fooddata p:nth-child(3) { font-size: 13px; color: var(--ff-text-secondary); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+#fooddata p:nth-child(4) { font-size: 13px; color: var(--ff-text-light); }
+
+.Description { color: var(--ff-text-secondary) !important; }
+
+/* Select area */
+#selectfood {
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 24px; height: 100%; min-width: 120px;
+  background: transparent; color: var(--ff-primary); font-weight: 600;
+  font-size: 14px; cursor: pointer; border: none;
+  border-left: 1px solid var(--ff-border-light); transition: var(--ff-transition);
+}
+#selectfood:hover { background: var(--ff-primary-light); }
+
+/* Custom Checkbox */
+.selectedfoodc {
+  appearance: none; -webkit-appearance: none; width: 0; height: 0;
+  position: absolute; opacity: 0;
+}
+
+.restaurant1.selected {
+  border-color: var(--ff-primary); background: var(--ff-primary-light);
+}
+.restaurant1.selected #selectfood {
+  background: var(--ff-primary); color: #fff;
+}
+
+/* Order Button */
+#orderFoods {
+  width: 100%; max-width: 1000px; margin: 32px auto 0; display: block;
+  padding: 16px 32px; background: var(--ff-accent); color: #fff;
+  border: none; border-radius: var(--ff-radius); font-size: 16px;
+  font-weight: 700; cursor: pointer; transition: var(--ff-transition);
+}
+#orderFoods::before { display: none; }
+#orderFoods:hover { background: var(--ff-accent-dark); transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,201,167,0.35); }
+
+/* Admin Check Food Section */
+.AdminCheckFood {
+  text-align: center; padding: 80px 24px; max-width: 500px; margin: 0 auto;
+}
+.AdminCheckFood h1 { font-size: 28px; margin-bottom: 16px; }
+.AdminCheckFood p { color: var(--ff-text-secondary); margin-bottom: 24px; }
+.AdminCheckFood button {
+  padding: 12px 28px; background: var(--ff-primary); color: #fff;
+  border: none; border-radius: var(--ff-radius); font-weight: 600;
+  cursor: pointer; transition: var(--ff-transition);
+}
+.AdminCheckFood button:hover { background: var(--ff-primary-dark); }
+
+@media (max-width: 640px) {
+  .restaurant1 { grid-template-columns: 1fr; }
+  .Checkfood { width: 100%; height: 180px; }
+  #selectfood { border-left: none; border-top: 1px solid var(--ff-border-light); padding: 14px; }
 }

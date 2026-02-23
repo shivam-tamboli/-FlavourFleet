@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import Welcome from './Welcome'
 import '../CSS/Login.css'
 import {Link} from 'react-router-dom'
 import axios from 'axios'
@@ -8,145 +7,112 @@ import { withRouter } from 'react-router-dom'
 class Login extends Component {
     constructor(props) {
         super(props);
-        this.state = {
-            listOfRest: [],
-            loading: true,
-        };
+        this.state = { error1: '', error2: '', loading: false };
     }
 
-    back=(e)=>
-    {
-        if(e.target.id==="loginback")
-        {
-            if(document.getElementById("loginx")!==null)
-            {
-                document.getElementById("loginx").click();
-            }
-        }
-    }
-
-    checkLogin=(e)=>
-    {
+    checkLogin = (e) => {
         e.preventDefault();
-        let phonenum = document.getElementById("phonenum").value; // 🛠 FIX: Keep as string
-        let password = document.getElementById("loginpass").value
+        const phonenum = document.getElementById("phonenum").value;
+        const password = document.getElementById("loginpass").value;
 
-        if(phonenum==="" || password==="")
-        {
-            if(phonenum==="")
-            {
-                document.getElementById("loginfalse1").innerHTML="Please enter phone number"
-                document.getElementById("phonenum").style.borderColor="rgba(215,65,85)";
-                document.getElementById("numselec").style.borderColor="rgba(215,65,85)";
-                document.getElementById("phonenum").style.borderWidth="2px"
-                document.getElementById("numselec").style.borderWidth="2px";
-            }
-            if(password==="")
-            {
-                document.getElementById("loginfalse2").innerHTML="Please enter password"
-                document.getElementById("loginpass").style.borderColor="rgba(215,65,85)";
-                document.getElementById("loginpass").style.borderWidth="2px";
-                return;
-            }
+        if (!phonenum || !password) {
+            this.setState({
+                error1: !phonenum ? 'Please enter phone number' : '',
+                error2: !password ? 'Please enter password' : ''
+            });
             return;
         }
 
-        console.log("Sending login request:", { phonenumber: phonenum, password });
+        this.setState({ loading: true, error1: '', error2: '' });
 
-        axios.post("http://localhost:8080/zomato/user/login", { phonenumber: phonenum, password: password })
+        axios.post("http://localhost:9090/zomato/user/login", { phonenumber: phonenum, password })
             .then((res) => {
-                console.log("Login response from backend:", res.data);
-
+                this.setState({ loading: false });
                 if (res.data === "phone") {
-                    document.getElementById("loginfalse1").innerHTML = "Invalid phone number";
+                    this.setState({ error1: "Phone number not registered" });
                 } else if (res.data === "password") {
-                    document.getElementById("loginfalse2").innerHTML = "Invalid password";
+                    this.setState({ error2: "Incorrect password" });
                 } else if (res.data === "Success_admin") {
                     localStorage.setItem('ap', JSON.stringify(phonenum));
                     this.props.history.push("/Admin");
                 } else if (res.data === "Success_user") {
-                    // 🛠 FIX: Save phone number to localStorage and navigate properly
                     localStorage.setItem('userPhoneNumber', phonenum);
-                    console.log("✅ Login successful, navigating to Userrestaurant with phone:", phonenum);
-
-                    this.props.history.push({
-                        pathname: "/Userrestaurant",
-                        state: {
-                            phonenum: phonenum  // 🛠 FIX: Pass as string, not Number
-                        }
-                    });
+                    this.props.history.push({ pathname: "/Userrestaurant", state: { phonenum } });
                 } else {
-                    console.warn("Unexpected login response:", res.data);
-                    document.getElementById("loginfalse2").innerHTML = "Login failed: " + String(res.data);
+                    this.setState({ error2: "Login failed. Try again." });
                 }
             })
-            .catch((err) => {
-                console.error("Login request error:", err);
-                document.getElementById("loginfalse2").innerHTML = "Network or server error — check console.";
+            .catch(() => {
+                this.setState({ loading: false, error2: "Server error. Please try again." });
             });
     }
 
-    checkNum=(e)=>
-    {
-        if(Number(e.target.value)===0 && e.key==="0")
-        {
-            e.preventDefault();
-        }
-        if(e.key!=="Backspace" && e.key!=="Tab")
-        {
-            if(String(e.target.value).length===10 || e.key==="e")
-            {
-                e.preventDefault();
-            }
+    checkNum = (e) => {
+        if (Number(e.target.value) === 0 && e.key === "0") e.preventDefault();
+        if (e.key !== "Backspace" && e.key !== "Tab") {
+            if (String(e.target.value).length === 10 || e.key === "e") e.preventDefault();
         }
     }
 
-    clearInavlid=()=>
-    {
-        document.getElementById("loginfalse1").innerHTML="";
-        document.getElementById("loginfalse2").innerHTML="";
-        document.getElementById("phonenum").style.borderColor="rgba(0,0,0,0.2)";
-        document.getElementById("numselec").style.borderColor="rgba(0,0,0,0.2)";
-        document.getElementById("loginpass").style.borderColor="rgba(0,0,0,0.2)";
-        document.getElementById("phonenum").style.borderWidth="1px"
-        document.getElementById("loginpass").style.borderWidth="1px"
-        document.getElementById("numselec").style.borderWidth="1px";
-    }
+    clearErrors = () => { this.setState({ error1: '', error2: '' }); }
 
     render() {
+        const { error1, error2, loading } = this.state;
         return (
-            <div>
-                <Welcome/>
-                <div id="loginback">
-                    <div id="loginwindow">
-                        <div id="loginw1">
-                            <p id="loginhead">Login</p>
-                            <Link to="/"><img src='../IMAGES/x.png' alt='Not Found' id="loginx"></img></Link>
-                        </div>
-                        <input type='number' id="phonenum" placeholder='Phone' onKeyDown={this.checkNum} onClick={this.clearInavlid} autoComplete="off"></input>
-                        <p id="loginfalse1"></p>
-                        <input type='password' id="loginpass" placeholder='Password' onClick={this.clearInavlid} autoComplete="off"></input >
-                        <p id="loginfalse2"></p>
-                        <input type='button' id="otp" value="Login" onClick={this.checkLogin}></input>
-                        <div id="or"><p id="ortext">or</p></div>
-                        <div id="mail">
-                            <img src='../IMAGES/mail.png' alt='Not Found' id="mailpic"></img>
-                            <p id="mailline">Continue with Email</p>
-                        </div>
-                        <div id="google">
-                            <img src='../IMAGES/google.png' alt='Not Found' id="googlepic"></img>
-                            <p id="googleline">Continue with Google</p>
-                        </div>
-                        <div id="newzom">
-                            <p id="newline1">New to Zomato?</p>
-                            <Link to='/Signup' className="newline2link"><p id="newline2">Create account</p></Link>
-                            <Link to='/Forgotpassword' className="newline2link"><p id="newline3">Forgot Password?</p></Link>
-                        </div>
-                        <div id="numselec">
-                            <img src='../IMAGES/Flag.png' id="numselecpic" alt="Not Found"></img>
-                            <p id="numselecnum">+91</p>
-                            <img src='../IMAGES/Downarr.png' alt="Not Found" id="numselecdar"></img>
-                            <div id="rl"></div>
+            <div className="auth-page">
+                <div className="auth-left">
+                    <Link to="/" className="auth-back-link">← Back to Home</Link>
+                    <div className="auth-brand">
+                        <span className="auth-brand-icon">🚀</span>
+                        <h1>Flavour<span>Fleet</span></h1>
+                        <p>Discover the best food & drinks, delivered fast</p>
+                    </div>
+                    <div className="auth-illustration">
+                        <div className="float-card fc1">🍕 Pizza</div>
+                        <div className="float-card fc2">🍔 Burgers</div>
+                        <div className="float-card fc3">🍜 Noodles</div>
+                        <div className="float-card fc4">☕ Coffee</div>
+                    </div>
+                </div>
+                <div className="auth-right">
+                    <div className="auth-form-card">
+                        <h2>Welcome back</h2>
+                        <p className="auth-subtitle">Log in to your account</p>
+
+                        <form onSubmit={this.checkLogin}>
+                            <label className="auth-label">Phone Number</label>
+                            <div className="auth-phone-group">
+                                <div className="auth-phone-prefix">+91</div>
+                                <input
+                                    type="number" id="phonenum"
+                                    placeholder="Enter 10-digit number"
+                                    onKeyDown={this.checkNum}
+                                    onClick={this.clearErrors}
+                                    autoComplete="off"
+                                />
+                            </div>
+                            {error1 && <p className="auth-error">{error1}</p>}
+
+                            <label className="auth-label">Password</label>
+                            <input
+                                type="password" id="loginpass"
+                                placeholder="Enter your password"
+                                onClick={this.clearErrors}
+                                autoComplete="off"
+                                className="auth-input"
+                            />
+                            {error2 && <p className="auth-error">{error2}</p>}
+
+                            <button type="submit" className="auth-submit" disabled={loading}>
+                                {loading ? 'Logging in...' : 'Log in'}
+                            </button>
+                        </form>
+
+                        <div className="auth-footer">
+                            <Link to="/Forgotpassword" className="auth-link">Forgot password?</Link>
+                            <div className="auth-footer-divider"></div>
+                            <p>Don't have an account? <Link to="/Signup" className="auth-link-primary">Sign up</Link></p>
+                            <p style={{fontSize:'12px',color:'#9CA3AF',marginTop:'12px'}}>🔒 Admin? Use the same login — you'll be redirected automatically</p>
                         </div>
                     </div>
                 </div>

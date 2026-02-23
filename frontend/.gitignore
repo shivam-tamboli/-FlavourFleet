@@ -1,0 +1,7 @@
+node_modules/
+build/
+dist/
+.env
+.idea/
+*.iml
+.DS_Store

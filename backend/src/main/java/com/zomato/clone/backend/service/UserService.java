@@ -38,6 +38,12 @@ public class UserService {
 
     public ResponseEntity<String> signUp(Map<String, String> signup) {
 
+        // Check if phone number already exists
+        Optional<UserInfo> existing = userInfoRepo.findByPhoneNumber(signup.get("phonenumber"));
+        if (existing.isPresent()) {
+            return new ResponseEntity<>("phone", HttpStatus.OK);
+        }
+
         UserInfo userInfo = new UserInfo();
         userInfo.setName(signup.get("name"));
         userInfo.setPhoneNumber(signup.get("phonenumber"));
@@ -46,6 +52,12 @@ public class UserService {
         userInfo.setAnswer(signup.get("answer"));
         userInfo.setPassword(signup.get("password"));
         userInfo.setLoginStatus(Boolean.FALSE);
+
+        // Admin signup: if admincode matches, set role to 0 (admin)
+        String adminCode = signup.get("admincode");
+        if (adminCode != null && adminCode.equals("FLAVOURFLEET2026")) {
+            userInfo.setRole(0);
+        }
 
         userInfo = userInfoRepo.save(userInfo);
 
@@ -99,11 +111,18 @@ public class UserService {
         }
 
         if (!userInfo1.getAnswer().equals(forgotPassword.get("answer"))) {
-            return new ResponseEntity<>("invalid_answer", HttpStatus.OK);
+            return new ResponseEntity<>("answer", HttpStatus.OK);
         }
 
+        String newPassword = forgotPassword.get("newpassword");
+        if (newPassword == null || newPassword.isEmpty()) {
+            newPassword = forgotPassword.get("password");
+        }
+        if (newPassword == null || newPassword.isEmpty()) {
+            return new ResponseEntity<>("password_required", HttpStatus.OK);
+        }
 
-        userInfo1.setPassword(forgotPassword.get("password"));
+        userInfo1.setPassword(newPassword);
         userInfoRepo.save(userInfo1);
 
         return new ResponseEntity<>("success", HttpStatus.OK);
@@ -257,8 +276,8 @@ public class UserService {
         OrderInfo orderInfo = orderInfoRepo.findByUserIdAndOrderId(user.getUserId(), orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        // ✅ REMOVED: orderInfo.setOrderFlag(1); - Don't change order status when rating
-        // ✅ Order status remains whatever it was before rating
+        // Mark order as rated
+        orderInfo.setOrderFlag(1);
         orderInfoRepo.save(orderInfo);
 
         // Update restaurant rating
@@ -381,7 +400,19 @@ public class UserService {
         return ResponseEntity.ok().body(restaurantFoods);
     }
 
-    // In UserService.java
-    // In UserService.java
+    public ResponseEntity<Map<String, String>> getProfile(Map<String, String> entity) {
+        String phoneNumber = entity.get("phonenumber");
+        Optional<UserInfo> userInfo = userInfoRepo.findByPhoneNumber(phoneNumber);
+        if (userInfo.isEmpty()) {
+            return new ResponseEntity<>(Map.of("error", "User not found"), HttpStatus.NOT_FOUND);
+        }
+        UserInfo user = userInfo.get();
+        Map<String, String> profile = new java.util.HashMap<>();
+        profile.put("name", user.getName());
+        profile.put("phone", user.getPhoneNumber());
+        profile.put("address", user.getAddress());
+        profile.put("role", String.valueOf(user.getRole()));
+        return ResponseEntity.ok().body(profile);
+    }
 
 }

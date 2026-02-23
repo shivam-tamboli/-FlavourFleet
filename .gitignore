@@ -1,49 +1,34 @@
-cat > .gitignore << 'EOF'
-# ==================== BACKEND IGNORES ====================
+# ==================== BACKEND ====================
 backend/target/
 backend/.gradle/
-backend/.mvn/
 backend/*.jar
 backend/*.war
-backend/.classpath
-backend/.project
-backend/.settings/
-backend/bin/
-backend/**.class
+backend/*.class
 backend/*.iml
 backend/HELP.md
 backend/main
-backend/mvnw*
-backend/pom.xml.old
+backend/.idea/
 
-# ==================== FRONTEND IGNORES ====================
+# ==================== FRONTEND ====================
 frontend/node_modules/
 frontend/build/
 frontend/dist/
-frontend/.next/
-frontend/.cache/
-frontend/.parcel-cache/
-frontend/.env*
-frontend/.gitignore
 frontend/*.iml
+frontend/.env*
+frontend/.idea/
 frontend/package-lock.json
-frontend/yarn.lock
-frontend/.eslintcache
 
-# ==================== IDE & SYSTEM FILES ====================
+# ==================== IDE & SYSTEM ====================
 .idea/
 .vscode/
+*.iml
 *.swp
 *.swo
-*.sublime-*
 .DS_Store
 Thumbs.db
 *.log
-logs/
 
-# ==================== TEMPORARY FILES ====================
-*.tmp
-*.temp
-coverage/
-.nyc_output/
-EOF
+# ==================== OS FILES ====================
+._*
+.Spotlight-V100
+.Trashes

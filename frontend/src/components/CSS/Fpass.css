@@ -1,142 +1,50 @@
-#fpback
-{
-    position: fixed;
-    top:0px;
-    left: 0px;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(30,30,30,0.9);
+/* ===== FORGOT PASSWORD MODAL ===== */
+#fpback {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(27,27,47,0.6); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
 }
-#fpwindow
-{
-    position: absolute;
-    top:120px;
-    left:535px;
-    height: 470px;
-    width: 450px;
-    background-color: white;
-    border-radius: 5px;
-    color: rgba(0,0,0,0.8);
+#fpwindow {
+  background: var(--ff-card); border-radius: var(--ff-radius-xl);
+  padding: 36px 32px; width: 100%; max-width: 420px;
+  box-shadow: var(--ff-shadow-lg); position: relative;
+  animation: slideUp 0.35s ease;
 }
-#fpw1
-{
-    display: flex;
-    position: absolute;
-    align-items: center;
-    width: 400px;
-    left: 22px;
-    justify-content: space-between;
-    top:-10px;
+#fpw1 { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+#fphead { font-family: var(--ff-font-heading); font-size: 24px; font-weight: 700; }
+#fpx { width: 20px; height: 20px; opacity: 0.4; cursor: pointer; }
+#fpx:hover { opacity: 1; }
+
+#fpphonenum, #bsecque, #bsecans, #brpass {
+  width: 100%; padding: 14px 18px; border: 2px solid var(--ff-border);
+  border-radius: var(--ff-radius); font-size: 15px; background: #fff;
+  transition: var(--ff-transition); margin-bottom: 4px;
 }
-#fphead
-{
-    font-size: 30px;
+#fpphonenum { -moz-appearance: textfield; padding-left: 100px; }
+#fpphonenum::-webkit-inner-spin-button { -webkit-appearance: none; }
+#fpphonenum:focus, #bsecans:focus, #brpass:focus { border-color: var(--ff-primary); box-shadow: 0 0 0 4px rgba(255,107,53,0.1); }
+#bsecque { background: var(--ff-border-light); color: var(--ff-text-secondary); }
+
+#fpfalse1, #fpfalse2, #fpfalse3 { font-size: 12px; color: var(--ff-danger); min-height: 18px; padding: 0 0 4px 4px; }
+
+#gq, #rsq {
+  width: 100%; padding: 14px; border: none; border-radius: var(--ff-radius);
+  font-size: 15px; font-weight: 600; cursor: pointer;
+  transition: var(--ff-transition); margin-bottom: 16px;
 }
-#fpphonenum
-{
-    position: absolute;
-    top:80px;
-    width: 285px;
-    left:137px;
-    outline: none;
-    height: 42px;
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
-    border:1px solid rgba(0,0,0,0.2);
-    border-left: none;
-    font-size: 20px;
-    color: rgba(0,0,0,0.7);
+#gq { background: var(--ff-secondary); color: #fff; }
+#gq:hover { background: #2d2d4a; }
+#rsq { background: var(--ff-primary); color: #fff; }
+#rsq:hover { background: var(--ff-primary-dark); }
+#rsq:disabled { background: var(--ff-border); color: var(--ff-text-light); cursor: not-allowed; }
+
+#fpselec {
+  position: absolute; top: 134px; left: 32px;
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 12px; height: 48px;
+  border-right: 2px solid var(--ff-border); pointer-events: none;
 }
-#bsecque,#bsecans,#brpass
-{
-    position: absolute;
-    top:180px;
-    left:22px;
-    width: 384px;
-    outline: none;
-    border: 1px solid rgba(0,0,0,0.2);
-    height: 42px;
-    border-radius: 5px;
-    padding-top: 3px;
-    padding-left: 10px;
-    padding-right: 10px;
-}
-#bsecans
-{
-    top:250px;
-}
-#brpass
-{
-    top:320px;
-}
-#fpx
-{
-    height: 20px;
-    width: 25px;
-    position: relative;
-    left: 10px;
-}
-#rsq
-{
-    position: absolute;
-    top:400px;
-    width: 405px;
-    left: 22px;
-    outline: none;
-    height: 46px;
-    border-radius: 5px;
-    border: none;
-    outline: none;
-    background-color: rgba(220,53,70,0.9);
-    color: white;
-    font-size: 17px;
-}
-#rsq:hover
-{
-    background-color: rgba(239,79,95,1);
-    cursor: pointer;
-}
-#fpselec
-{
-    display: flex;
-    position: absolute;
-    align-items: center;
-    top:80px;
-    height: 44px;
-    border: 1px solid rgba(0,0,0,0.2);
-    left: 22px;
-    width: 114px;
-    border-right: none;
-    border-top-left-radius: 5px;
-    border-bottom-left-radius: 5px;
-}
-#fpfalse1,#fpfalse2,#fpfalse3
-{
-    position: absolute;
-    color: rgba(215,65,85);
-    top:114px;
-    left:23px;
-    font-size: 12px;
-    font-weight: 0;
-}
-#fpfalse2
-{
-    top:285px;
-}
-#fpfalse3
-{
-    top:355px;
-}
-#gq
-{
-    position: absolute;
-    border-radius: 5px;
-    border: none;
-    outline: none;
-    background-color: rgba(220,53,70,0.9);
-    color: white;
-    font-size: 15px;
-    height: 30px;
-    top:137px;
-    left:165px;
-}
+#fpselec #numselecpic { width: 24px; height: 18px; border-radius: 3px; }
+#fpselec #numselecnum { font-size: 14px; font-weight: 600; color: var(--ff-text-secondary); }
+#fpselec #numselecdar { width: 12px; opacity: 0.4; }
+#rl { display: none; }

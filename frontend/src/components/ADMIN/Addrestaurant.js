@@ -4,164 +4,101 @@ import { withRouter } from 'react-router-dom';
 import '../CSS/Addres.css'
 
 class Addrestaurant extends Component {
-
-    constructor(props){
+    constructor(props) {
         super(props);
-        this.state = {
-            restaurantName: "",
-            restaurantAddress: "",
-            imagesLink: []
-        };
-        this.count = 0;
+        this.state = { restaurantName: "", restaurantAddress: "", imagesLink: [], imageInput: "" };
     }
 
     submit = (e) => {
         e.preventDefault();
+        const { restaurantName, restaurantAddress, imagesLink } = this.state;
+        if (!restaurantName || !restaurantAddress) { alert("Please fill in all fields"); return; }
 
-        const restaurantName = document.getElementById('restaurantname').value;
-        const restaurantAddress = document.getElementById('restaurantaddress').value;
-
-        if (!restaurantName || !restaurantAddress) {
-            alert("Please fill in restaurant name and address");
-            return;
-        }
-
-        const imagesToSend = this.state.imagesLink.length === 0
+        const images = imagesLink.length === 0
             ? ["https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop"]
-            : this.state.imagesLink;
+            : imagesLink;
 
-        const restaurantData = {
-            restaurantName: restaurantName,
-            restaurantAddress: restaurantAddress,
-            restaurantimages: imagesToSend
-        };
-
-        console.log("FINAL DATA BEING SENT:", JSON.stringify(restaurantData, null, 2));
-
-        axios.post("http://localhost:8080/zomato/admin/add-restaurant", restaurantData)
-            .then((resp) => {
-                console.log("Success:", resp.data);
-
-
-                document.getElementById('restaurantname').value = "";
-                document.getElementById('restaurantaddress').value = "";
-                document.getElementById('enterImage').value = "";
-                document.getElementById('restaurantImages').innerHTML = "";
-                this.setState({ imagesLink: [] });
-
-                alert("Restaurant added successfully!");
-
-
-                this.props.history.push("/Admin");
-
-            })
-            .catch((err) => {
-                console.log("Full error:", err);
-                console.log("Error response data:", err.response?.data);
-                alert("Error adding restaurant: " + (err.response?.data || err.message));
-            });
+        axios.post("http://localhost:9090/zomato/admin/add-restaurant", {
+            restaurantName, restaurantAddress, restaurantimages: images
+        })
+        .then((resp) => {
+            if (resp.data === "address") { alert("Restaurant already exists at this address"); return; }
+            alert("Restaurant added successfully!");
+            this.props.history.push("/Admin");
+        })
+        .catch((err) => alert("Error: " + (err.response?.data || err.message)));
     }
 
-    uploadImage = (e) => {
-        const imageUrl = document.getElementById('enterImage').value;
-
-        if(!imageUrl) {
-            alert("Please enter an image URL");
-            return;
-        }
-
-        if(imageUrl.length >= 9501) {
-            alert("Link too long");
-            return;
-        }
-
-        this.setState(prevState => ({
-            imagesLink: [...prevState.imagesLink, imageUrl]
-        }));
-
-        let section = document.createElement('div');
-        section.className = "Image";
-        section.id = this.count;
-
-        let img = document.createElement('img');
-        img.src = imageUrl;
-        img.setAttribute("class", "Addedimg")
-
-        let button = document.createElement('button');
-        button.textContent = "X";
-        button.setAttribute("class", "imgx")
-        button.onclick = (e) => this.removeImage(e, this.count);
-        section.setAttribute("class", "imgwrp")
-        section.appendChild(img);
-        section.appendChild(button);
-        document.getElementById('restaurantImages').appendChild(section);
-
-        this.count++;
-        if(this.count === 5) {
-            document.getElementById('addImage').disabled = true;
-        }
-        document.getElementById('enterImage').value = "";
+    addImage = () => {
+        const { imageInput, imagesLink } = this.state;
+        if (!imageInput) return;
+        if (imagesLink.length >= 5) { alert("Maximum 5 images"); return; }
+        this.setState({ imagesLink: [...imagesLink, imageInput], imageInput: "" });
     }
 
-    removeImage = (e, index) => {
-        let ele = e.target.parentNode;
-
-        this.setState(prevState => ({
-            imagesLink: prevState.imagesLink.filter((_, i) => i !== index)
-        }));
-
-        this.count--;
-        ele.parentNode.removeChild(ele);
-
-        document.getElementById('addImage').disabled = false;
+    removeImage = (idx) => {
+        this.setState(prev => ({ imagesLink: prev.imagesLink.filter((_, i) => i !== idx) }));
     }
 
-    back = () => {
-        this.props.history.push("/Admin");
-    }
+    back = () => { this.props.history.push("/Admin"); }
 
     render() {
+        const { restaurantName, restaurantAddress, imagesLink, imageInput } = this.state;
         return (
-            <>
-                <div id="Adlogback"></div>
-                <div id="Admintag">
-                    <img src='../IMAGES/Adminic.png' alt='Not found'></img>
-                    <p>ADMIN</p>
+            <div className="admin-form-page">
+                <nav className="admin-topnav">
+                    <div className="admin-topnav-left">
+                        <span className="admin-logo-icon">🚀</span>
+                        <span className="admin-logo-text">FlavourFleet</span>
+                        <span className="admin-badge">Admin Panel</span>
+                    </div>
+                    <button className="admin-back-btn" onClick={this.back}>← Back to Dashboard</button>
+                </nav>
+
+                <div className="admin-form-container">
+                    <div className="admin-form-card">
+                        <div className="afc-header">
+                            <span className="afc-icon">🏪</span>
+                            <div>
+                                <h2>Add New Restaurant</h2>
+                                <p>Fill in the details to register a new restaurant</p>
+                            </div>
+                        </div>
+
+                        <form onSubmit={this.submit}>
+                            <label className="admin-label">Restaurant Name</label>
+                            <input type="text" className="admin-input" placeholder="e.g. Dragon Wok Kitchen"
+                                value={restaurantName} onChange={e => this.setState({restaurantName: e.target.value})}
+                                maxLength={50} required />
+
+                            <label className="admin-label">Address</label>
+                            <input type="text" className="admin-input" placeholder="e.g. 42, MG Road, Bangalore"
+                                value={restaurantAddress} onChange={e => this.setState({restaurantAddress: e.target.value})}
+                                maxLength={100} required />
+
+                            <label className="admin-label">Restaurant Images ({imagesLink.length}/5)</label>
+                            {imagesLink.length > 0 && (
+                                <div className="admin-image-preview">
+                                    {imagesLink.map((url, i) => (
+                                        <div key={i} className="admin-img-thumb">
+                                            <img src={url} alt={`Restaurant ${i+1}`} onError={e => { e.target.src='https://via.placeholder.com/80x60?text=Error' }} />
+                                            <button type="button" onClick={() => this.removeImage(i)}>✕</button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            <div className="admin-image-add">
+                                <input type="url" className="admin-input" placeholder="Paste image URL here..."
+                                    value={imageInput} onChange={e => this.setState({imageInput: e.target.value})} />
+                                <button type="button" className="admin-img-add-btn" onClick={this.addImage}
+                                    disabled={imagesLink.length >= 5}>+ Add</button>
+                            </div>
+
+                            <button type="submit" className="admin-submit-btn">🏪 Add Restaurant</button>
+                        </form>
+                    </div>
                 </div>
-                <img src="../IMAGES/Home.png" alt="Not found" className='Home' onClick={this.back}></img>
-                <div className='AddRestaurant' id='AddRestaurant'>
-                    <h1 id="arhead">Add Restaurant</h1>
-                    <form id="Addresform">
-                        <input
-                            id='restaurantname'
-                            type="text"
-                            maxLength={50}
-                            placeholder='Enter Restaurant Name'
-                            required
-                        ></input>
-                        <input
-                            id="restaurantaddress"
-                            type="text"
-                            maxLength={100}
-                            placeholder='Enter Address'
-                            required
-                        ></input>
-                        <div id='restaurantImages'></div>
-                        <input
-                            id="enterImage"
-                            type="url"
-                            placeholder='Enter Image URL'
-                        ></input>
-                        <input
-                            id="addImage"
-                            type="button"
-                            value='+'
-                            onClick={this.uploadImage}
-                        ></input>
-                        <button type="submit" id="addresssubmit" onClick={this.submit}>SUBMIT</button>
-                    </form>
-                </div>
-            </>
+            </div>
         );
     }
 }

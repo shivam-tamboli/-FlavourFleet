@@ -1,7 +1,2 @@
-#Grid
-{
-    display: flex;
-    width: 100%;
-    justify-content: space-between;
-    margin-bottom: 37px;
-}
+/* Grid — hidden in new design, cities/countries use new layout */
+#Grid { display: none; }

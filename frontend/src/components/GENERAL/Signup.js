@@ -1,239 +1,185 @@
 import React, { Component } from 'react'
-import Welcome from './Welcome'
-import '../CSS/Signup.css'
+import '../CSS/Login.css'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
-import History from '../History'
+import { withRouter } from 'react-router-dom'
 
-export class Signup extends Component {
-  constructor(props) {
-    super(props)
-    document.addEventListener('click',this.back)
-  }
-
-  back=(e)=>
-  {
-    if(document.getElementById("signupx")!==null)
-    {
-      if(e.target.id==="signupback")
-      {
-        document.getElementById("signupx").click();
-      }
+class Signup extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            errors: {}, loading: false
+        };
     }
-  }
 
-  checkNum=(e)=>
-  {
-    if(Number(e.target.value)===0 && e.key==="0")
-    {
-      e.preventDefault();
+    checkNum = (e) => {
+        if (Number(e.target.value) === 0 && e.key === "0") e.preventDefault();
+        if (e.key !== "Backspace" && e.key !== "Tab") {
+            if (String(e.target.value).length === 10 || e.key === "e") e.preventDefault();
+        }
     }
-    if(e.key!=="Backspace" && e.key!=="Tab")
-    {
-      if(String(e.target.value).length===10 || e.key==="e")
-      {
+
+    createAccount = (e) => {
         e.preventDefault();
-      }
-    }
-  }
+        const fname = document.getElementById("signupfname").value.trim();
+        const lname = document.getElementById("signuplname").value.trim();
+        const phone = document.getElementById("signupphone").value.trim();
+        const address = document.getElementById("signupadd").value.trim();
+        const secque = document.getElementById("signupques").value;
+        const secans = document.getElementById("signupans").value.trim();
+        const pass = document.getElementById("signuppass").value;
+        const rpass = document.getElementById("signuprpass").value;
 
-  createAccount=()=>
-  {
-    let fname=document.getElementById("signupfname");
-    let lname=document.getElementById("signuplname");
-    let phnnum=document.getElementById("signupphone");
-    let add=document.getElementById("signupadd");
-    let secque=document.getElementById("signupques");
-    let secans=document.getElementById("signupans");
-    let pass=document.getElementById("signuppass");
-    let rpass=document.getElementById("signuprpass");
+        let errors = {};
+        if (!fname) errors.fname = "First name is required";
+        if (!lname) errors.lname = "Last name is required";
+        if (!phone || phone.length < 10) errors.phone = "Enter a valid 10-digit number";
+        if (!address) errors.address = "Address is required";
+        if (!secque || secque === "Select Security Question") errors.secque = "Select a security question";
+        if (!secans) errors.secans = "Answer is required";
+        if (!pass) errors.pass = "Password is required";
+        if (!rpass) errors.rpass = "Please confirm password";
+        if (pass && rpass && pass !== rpass) { errors.pass = "Passwords don't match"; errors.rpass = "Passwords don't match"; }
 
-    if(fname.value==="" || lname.value==="" || Number(phnnum.value)<100000000 || secque.value==="Select Security Question" || add.value==="" || secans.value==="" || pass.value==="" || rpass.value==="" || pass.value!==rpass.value)
-    {
-      if(fname.value==="")
-      {
-        fname.style.borderColor="rgba(215,65,85)"
-        fname.style.borderWidth="2px"
-        document.getElementById("sf1").innerHTML="Enter first name"
-      }
-      if(lname.value==="")
-      {
-        lname.style.borderColor="rgba(215,65,85)"
-        lname.style.borderWidth="2px"
-        document.getElementById("sf2").innerHTML="Enter last name"
-      }
-      if(Number(phnnum.value)<1000000000)
-      {
-        phnnum.style.borderColor="rgba(215,65,85)"
-        phnnum.style.borderWidth="2px"
-        document.getElementById("sf3").innerHTML="Please enter 10-digits"
-      }
-      if(add.value==="")
-      {
-        add.style.borderColor="rgba(215,65,85)"
-        add.style.borderWidth="2px"
-        document.getElementById("sf4").innerHTML="Enter address"
-      }
-      if(secque.value==="Select Security Question")
-      {
-        secque.style.borderColor="rgba(215,65,85)"
-        secque.style.borderWidth="2px"
-        document.getElementById("sf5").innerHTML="Security question not selected"
-      }
-      if(secans.value==="")
-      {
-        secans.style.borderColor="rgba(215,65,85)"
-        secans.style.borderWidth="2px"
-        document.getElementById("sf6").innerHTML="Enter security answer"
-      }
-      if(pass.value!=="" && pass.value!==rpass.value && rpass.value!=="")
-      {
-        pass.style.borderColor="rgba(215,65,85)"
-        pass.style.borderWidth="2px"
-        document.getElementById("sf7").innerHTML="Password did'nt matched"
-        rpass.style.borderColor="rgba(215,65,85)"
-        rpass.style.borderWidth="2px"
-        document.getElementById("sf8").innerHTML="Password did'nt matched"
-      }
-      else
-      {
-        if(pass.value==="")
-        {
-          pass.style.borderColor="rgba(215,65,85)"
-          pass.style.borderWidth="2px"
-          document.getElementById("sf7").innerHTML="Enter password"
-        }
-        if(rpass.value==="")
-        {
-          rpass.style.borderColor="rgba(215,65,85)"
-          rpass.style.borderWidth="2px"
-          document.getElementById("sf8").innerHTML="Re-Enter password"
-        }
-      }
-      return;
-    }
+        this.setState({ errors });
+        if (Object.keys(errors).length > 0) return;
 
+        this.setState({ loading: true });
 
-    axios.post("http://localhost:8080/zomato/user/signup",{
-      name: fname.value + " " + lname.value,
-      phonenumber: phnnum.value,
-      address: add.value,
-      secretquestion: secque.value,
-      answer: secans.value,
-      password: pass.value
-    })
-        .then((response) => {
-          console.log("Signup response:", response.data);
-          if (response.data === "success") {
-            alert("Account created successfully!");
-            History.push('/Login');
-          } else if (response.data === "phone") {
-            document.getElementById("sf3").innerHTML = "Phone number already exists!";
-            phnnum.style.borderColor = "rgba(215,65,85)";
-            phnnum.style.borderWidth = "2px";
-          } else {
-            alert("Signup failed: " + response.data);
-          }
+        const admincode = document.getElementById("signupadmincode").value.trim();
+
+        axios.post("http://localhost:9090/zomato/user/signup", {
+            name: fname + " " + lname,
+            phonenumber: phone,
+            address: address,
+            secretquestion: secque,
+            answer: secans,
+            password: pass,
+            admincode: admincode || undefined
         })
-        .catch((error) => {
-          console.error("Signup error:", error);
-          alert("Signup failed. Please try again.");
+        .then((resp) => {
+            this.setState({ loading: false });
+            if (resp.data === "success") {
+                alert("Account created successfully!");
+                this.props.history.push('/Login');
+            } else if (resp.data === "phone") {
+                this.setState({ errors: { phone: "Phone number already registered" } });
+            } else {
+                alert("Signup failed: " + resp.data);
+            }
+        })
+        .catch(() => {
+            this.setState({ loading: false, errors: { rpass: "Server error. Try again." } });
         });
-  }
+    }
 
-  clear=()=>
-  {
-    let fname=document.getElementById("signupfname");
-    let lname=document.getElementById("signuplname");
-    let phnnum=document.getElementById("signupphone");
-    let add=document.getElementById("signupadd");
-    let secque=document.getElementById("signupques");
-    let secans=document.getElementById("signupans");
-    let pass=document.getElementById("signuppass");
-    let rpass=document.getElementById("signuprpass");
-    let sf1=document.getElementById("sf1");
-    let sf2=document.getElementById("sf2");
-    let sf3=document.getElementById("sf3");
-    let sf4=document.getElementById("sf4");
-    let sf5=document.getElementById("sf5");
-    let sf6=document.getElementById("sf6");
-    let sf7=document.getElementById("sf7");
-    let sf8=document.getElementById("sf8");
-    fname.style.borderColor="rgba(0,0,0,0.2)"
-    fname.style.borderWidth="1px"
-    lname.style.borderColor="rgba(0,0,0,0.2)"
-    lname.style.borderWidth="1px"
-    phnnum.style.borderColor="rgba(0,0,0,0.2)"
-    phnnum.style.borderWidth="1px"
-    add.style.borderColor="rgba(0,0,0,0.2)"
-    add.style.borderWidth="1px"
-    secans.style.borderColor="rgba(0,0,0,0.2)"
-    secans.style.borderWidth="1px"
-    pass.style.borderColor="rgba(0,0,0,0.2)"
-    pass.style.borderWidth="1px"
-    rpass.style.borderColor="rgba(0,0,0,0.2)"
-    rpass.style.borderWidth="1px"
-    secque.style.borderColor="rgba(0,0,0,0.2)"
-    secque.style.borderWidth="1px"
-    sf1.innerHTML=""
-    sf2.innerHTML=""
-    sf3.innerHTML=""
-    sf4.innerHTML=""
-    sf5.innerHTML=""
-    sf6.innerHTML=""
-    sf7.innerHTML=""
-    sf8.innerHTML=""
-  }
+    clearError = (field) => {
+        this.setState(prev => {
+            const errors = { ...prev.errors };
+            delete errors[field];
+            return { errors };
+        });
+    }
 
-  render() {
-    return (
-        <div>
-          <Welcome/>
-          <div id="signupback">
-            <div id="signupwindow">
-              <div id="signupw1">
-                <p id="signuphead">Signup</p>
-                <Link to='/'><img src='../IMAGES/x.png' alt='Not Found' id="signupx"></img></Link>
-              </div>
-              <input type='text' id="signupfname" placeholder='First Name' onClick={this.clear} autoComplete="off"></input>
-              <p id="sf1"></p>
-              <input type='text' id="signuplname" placeholder='Last Name' onClick={this.clear} autoComplete="off"></input>
-              <p id="sf2"></p>
-              <input type='number' id="signupphone" placeholder='Phone' maxLength="10" onKeyDown={this.checkNum} onClick={this.clear} autoComplete="off"></input>
-              <p id="sf3"></p>
-              <input type='text' id="signupadd" placeholder='Address' onClick={this.clear} autoComplete="off"></input>
-              <p id="sf4"></p>
-              <select id="signupques" onClick={this.clear}>
-                <option>Select Security Question</option>
-                <option>What's your favorite movie?</option>
-                <option>What was your first car?</option>
-                <option>What is your astrological sign?</option>
-                <option>What city were you born in?</option>
-              </select>
-              <p id="sf5"></p>
-              <input type='text' placeholder='Security answer' id="signupans" onClick={this.clear} autoComplete="off"></input>
-              <p id="sf6"></p>
-              <input type='password' id="signuppass" placeholder='Password' onClick={this.clear} autoComplete="off"></input>
-              <p id="sf7"></p>
-              <input type='password' id="signuprpass" placeholder='Re-enter Password' onClick={this.clear} autoComplete="off"></input>
-              <p id="sf8"></p>
-              <div id="tc">
-                <input type='checkbox' id="agree"></input>
-                <label htmlFor="agree" id="agreetext">
-                  I agree to Zomato's <a href='http://www.zomato.com/policies/terms-of-service/' target='blank' className='agred'><span>Terms of Service, Privacy Policy</span></a> and<br></br>
-                  <a href='http://www.zomato.com/policies/' className='agred' target='blank'><span>Content Policies</span></a>
-                </label>
-              </div>
-              <input type='button' value="Create account" id="createacc" onClick={this.createAccount}></input>
-              <div id="ahacc">
-                <p id="newline1">Already have an account?</p>
-                <Link to="/Login" className='newline2link'><p id="newline2">Log in</p></Link>
-              </div>
+    render() {
+        const { errors, loading } = this.state;
+        return (
+            <div className="auth-page">
+                <div className="auth-left">
+                    <Link to="/" className="auth-back-link">← Back to Home</Link>
+                    <div className="auth-brand">
+                        <span className="auth-brand-icon">🚀</span>
+                        <h1>Flavour<span>Fleet</span></h1>
+                        <p>Join thousands of food lovers today</p>
+                    </div>
+                    <div className="auth-illustration">
+                        <div className="float-card fc1">🎉 Free Delivery</div>
+                        <div className="float-card fc2">⭐ Top Rated</div>
+                        <div className="float-card fc3">🔥 Trending</div>
+                        <div className="float-card fc4">💝 Save More</div>
+                    </div>
+                </div>
+                <div className="auth-right" style={{overflowY:'auto'}}>
+                    <div className="auth-form-card" style={{maxWidth:'480px'}}>
+                        <h2>Create your account</h2>
+                        <p className="auth-subtitle">Start ordering your favorite food</p>
+
+                        <form onSubmit={this.createAccount}>
+                            <div className="auth-row">
+                                <div>
+                                    <label className="auth-label">First Name</label>
+                                    <input type="text" id="signupfname" placeholder="First name" className="auth-input" onClick={() => this.clearError('fname')} autoComplete="off" />
+                                    {errors.fname && <p className="auth-error">{errors.fname}</p>}
+                                </div>
+                                <div>
+                                    <label className="auth-label">Last Name</label>
+                                    <input type="text" id="signuplname" placeholder="Last name" className="auth-input" onClick={() => this.clearError('lname')} autoComplete="off" />
+                                    {errors.lname && <p className="auth-error">{errors.lname}</p>}
+                                </div>
+                            </div>
+
+                            <label className="auth-label">Phone Number</label>
+                            <div className="auth-phone-group">
+                                <div className="auth-phone-prefix">+91</div>
+                                <input type="number" id="signupphone" placeholder="Enter 10-digit number" onKeyDown={this.checkNum} onClick={() => this.clearError('phone')} autoComplete="off" />
+                            </div>
+                            {errors.phone && <p className="auth-error">{errors.phone}</p>}
+
+                            <label className="auth-label">Address</label>
+                            <input type="text" id="signupadd" placeholder="Your delivery address" className="auth-input" onClick={() => this.clearError('address')} autoComplete="off" />
+                            {errors.address && <p className="auth-error">{errors.address}</p>}
+
+                            <label className="auth-label">Security Question</label>
+                            <select id="signupques" className="auth-select" onClick={() => this.clearError('secque')}>
+                                <option>Select Security Question</option>
+                                <option>What's your favorite movie?</option>
+                                <option>What was your first car?</option>
+                                <option>What is your astrological sign?</option>
+                                <option>What city were you born in?</option>
+                            </select>
+                            {errors.secque && <p className="auth-error">{errors.secque}</p>}
+
+                            <label className="auth-label">Security Answer</label>
+                            <input type="text" id="signupans" placeholder="Your answer" className="auth-input" onClick={() => this.clearError('secans')} autoComplete="off" />
+                            {errors.secans && <p className="auth-error">{errors.secans}</p>}
+
+                            <div className="auth-row">
+                                <div>
+                                    <label className="auth-label">Password</label>
+                                    <input type="password" id="signuppass" placeholder="Password" className="auth-input" onClick={() => this.clearError('pass')} autoComplete="off" />
+                                    {errors.pass && <p className="auth-error">{errors.pass}</p>}
+                                </div>
+                                <div>
+                                    <label className="auth-label">Confirm Password</label>
+                                    <input type="password" id="signuprpass" placeholder="Re-enter password" className="auth-input" onClick={() => this.clearError('rpass')} autoComplete="off" />
+                                    {errors.rpass && <p className="auth-error">{errors.rpass}</p>}
+                                </div>
+                            </div>
+
+                            <label className="auth-label" style={{color:'#9CA3AF',fontSize:'12px'}}>Admin Code (optional)</label>
+                            <input type="text" id="signupadmincode" placeholder="Leave blank for regular user account" className="auth-input" style={{borderStyle:'dashed'}} autoComplete="off" />
+                            <p style={{fontSize:'12px',color:'#9CA3AF',margin:'4px 0 0 4px'}}>Only enter if you have an admin invitation code</p>
+
+                            <div className="auth-checkbox">
+                                <input type="checkbox" id="agree" />
+                                <label htmlFor="agree">
+                                    I agree to FlavourFleet's <a href="#terms">Terms of Service</a> and <a href="#privacy">Privacy Policy</a>
+                                </label>
+                            </div>
+
+                            <button type="submit" className="auth-submit" disabled={loading}>
+                                {loading ? 'Creating account...' : 'Create Account'}
+                            </button>
+                        </form>
+
+                        <div className="auth-footer">
+                            <p>Already have an account? <Link to="/Login" className="auth-link-primary">Log in</Link></p>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-    )
-  }
+        )
+    }
 }
 
-export default Signup
+export default withRouter(Signup)

@@ -1,69 +1,113 @@
-.UserLoginBack
-{
-    position: absolute;
-    height:540px;
-    overflow-y: scroll;
-    background-color: rgba(255, 255, 255, 0.5);
-    padding: 50px;
-    width: 900px;
-    left:275px;
-    border-radius: 20px;
-    top:20px;
-    padding-top: 80px;
+/* ===== USER NAV HEADER ===== */
+.user-nav-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: var(--ff-nav-height);
+  background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--ff-border-light);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px;
 }
-.UserLoginButton
-{
-    position: absolute;
-    top:20px;
-    left:10%;
-    width: 80%;
-    display: flex;
-    justify-content: space-between;
+.nav-brand {
+  display: flex; align-items: center; gap: 8px; cursor: pointer;
+  font-family: var(--ff-font-heading); font-size: 22px; font-weight: 700; color: var(--ff-text);
 }
-.ShowFoodUsrB,.ShowResUsrB,.ShowOrderUsrB
-{
-    border: none;
-    outline: none;
-    background-color:  rgba(239,79,95,1);
-    width: 200px;
-    font-size: 20px;
-    height: 40px;
-    color: rgba(255, 255, 255, 0.9);
-    border-radius: 10px;
+.brand-icon { font-size: 24px; }
+.brand-text { color: var(--ff-primary); }
 
+.UserLoginButton { display: flex; gap: 6px; }
+.UserLoginButton button {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 20px; border-radius: var(--ff-radius-full);
+  font-size: 14px; font-weight: 600; background: transparent;
+  color: var(--ff-text-secondary); border: none;
+  transition: var(--ff-transition); cursor: pointer;
 }
-.Home
-{
-    position: absolute;
-    height: 30px;
-    top:42px;
-    left:170px;
-    background-color: rgba(255, 255, 255, 0.4);
-    padding: 5px;
-    border-radius: 10px;
+.UserLoginButton button:hover { background: var(--ff-border-light); color: var(--ff-text); }
+.UserLoginButton button span { font-size: 16px; }
+
+/* ─── Profile Avatar & Dropdown ─── */
+.nav-profile-wrapper { position: relative; }
+.nav-profile-btn {
+  display: flex; align-items: center; gap: 10px;
+  background: transparent; border: none; cursor: pointer;
+  padding: 4px 8px; border-radius: var(--ff-radius-full);
+  transition: var(--ff-transition);
 }
-.Home:hover
-{
-    cursor: pointer;
+.nav-profile-btn:hover { background: var(--ff-border-light); }
+
+.nav-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--ff-primary), #E84118);
+  color: #fff; font-weight: 700; font-size: 15px;
+  display: flex; align-items: center; justify-content: center;
+  letter-spacing: 0.5px;
 }
-.Logout
-{
-    position: absolute;
-    height: 30px;
-    top:90px;
-    left:170px;
-    background-color: rgba(255, 255, 255, 0.4);
-    padding: 5px;
-    border-radius: 10px;
+.nav-profile-name {
+  font-size: 14px; font-weight: 600; color: var(--ff-text);
 }
-.Logout:hover
-{
-    cursor: pointer;
+
+/* Overlay to close dropdown on outside click */
+.profile-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 199;
 }
-#nrp
-{
-    font-size: 25px;
-    top:145px;
-    position: absolute;
-    left:70px;
+
+/* Dropdown */
+.profile-dropdown {
+  position: absolute; top: calc(100% + 10px); right: 0;
+  width: 280px; background: #fff;
+  border-radius: 16px; z-index: 200;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+  animation: dropdownSlide 0.2s ease;
+  overflow: hidden;
+}
+@keyframes dropdownSlide {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.profile-dropdown-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 20px; background: linear-gradient(135deg, #FFF5F0, #FFF0EB);
+}
+.profile-avatar-lg {
+  width: 50px; height: 50px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--ff-primary), #E84118);
+  color: #fff; font-weight: 700; font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.profile-info { min-width: 0; }
+.profile-name {
+  font-size: 16px; font-weight: 700; color: var(--ff-text);
+  margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.profile-phone {
+  font-size: 13px; color: var(--ff-text-secondary); margin: 4px 0 0;
+}
+
+.profile-dropdown-divider {
+  height: 1px; background: var(--ff-border-light); margin: 0;
+}
+
+.profile-dropdown-item {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 14px 20px; background: transparent; border: none;
+  font-size: 14px; font-weight: 500; color: var(--ff-text);
+  cursor: pointer; transition: var(--ff-transition); text-align: left;
+}
+.profile-dropdown-item:hover { background: #F9FAFB; }
+.profile-dropdown-item span { font-size: 18px; }
+.profile-logout-item { color: var(--ff-danger); }
+.profile-logout-item:hover { background: #FFF5F5; }
+
+.UserLoginBack { padding-top: var(--ff-nav-height); }
+
+@media (max-width: 768px) {
+  .user-nav-header { padding: 0 16px; }
+  .UserLoginButton button { padding: 8px 12px; font-size: 13px; }
+  .UserLoginButton button span { display: none; }
+  .nav-brand { font-size: 18px; }
+  .nav-profile-name { display: none; }
+  .profile-dropdown { width: 260px; right: -8px; }
 }
