@@ -133,7 +133,7 @@ export default class RateOrder extends Component {
             return;
         }
 
-        axios.post("http://localhost:9090/zomato/user/rate-order", ratingData)
+        axios.post("http://localhost:9090/flavorfleet/user/rate-order", ratingData)
             .then((resp) => {
                 console.log("✅ Rating submitted successfully:", resp.data);
                 alert("Thank you for your rating!");

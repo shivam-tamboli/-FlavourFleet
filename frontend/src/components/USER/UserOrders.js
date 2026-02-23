@@ -43,7 +43,7 @@ export default class UserOrders extends Component {
             console.log("📥 Fetching orders for phone:", this.userPhoneNumber);
 
             const response = await axios.post(
-                "http://localhost:9090/zomato/user/get-all-order-details",
+                "http://localhost:9090/flavorfleet/user/get-all-order-details",
                 { phonenumber: this.userPhoneNumber },
                 {
                     timeout: 10000,

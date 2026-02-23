@@ -31,7 +31,7 @@ class ShowUserFoods extends Component {
 
     fetchFoodItems = () => {
         axios
-            .get(`http://localhost:9090/zomato/user/get-all-food-items`)
+            .get(`http://localhost:9090/flavorfleet/user/get-all-food-items`)
             .then((resp) => {
                 if (resp.data && Array.isArray(resp.data)) {
                     this.setState({
@@ -61,7 +61,7 @@ class ShowUserFoods extends Component {
         const q = query.toLowerCase();
 
         // Also try backend search-by-fooditem API
-        axios.post("http://localhost:9090/zomato/user/search-by-fooditem", { search: query })
+        axios.post("http://localhost:9090/flavorfleet/user/search-by-fooditem", { search: query })
             .then((resp) => {
                 if (resp.data && resp.data.length > 0) {
                     // Map SearchFoodItem results to same format as get-all-food-items

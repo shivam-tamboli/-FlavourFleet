@@ -158,13 +158,13 @@ export default class PlaceOrder extends Component {
         console.log("Final order object being sent:", JSON.stringify(this.obj, null, 2));
         console.log("Phone number verification:", this.obj.phonenumber);
 
-        axios.post("http://localhost:9090/zomato/user/place-order", this.obj)
+        axios.post("http://localhost:9090/flavorfleet/user/place-order", this.obj)
             .then((resp) => {
                 console.log("Order successful:", resp.data);
 
                 // After placing order, redirect to rate the order
                 // First fetch the latest order to get its ID
-                axios.post("http://localhost:9090/zomato/user/get-all-order-details", {
+                axios.post("http://localhost:9090/flavorfleet/user/get-all-order-details", {
                     phonenumber: this.userPhoneNumber
                 }).then((orderResp) => {
                     const orders = orderResp.data || [];

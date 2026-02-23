@@ -13,16 +13,16 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.zomato.clone</groupId>
-    <artifactId>backend</artifactId>
+    <!-- Updated Project Identity -->
+    <groupId>com.flavorfleet</groupId>
+    <artifactId>flavorfleet-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>Zomato_clone</name>
-    <description>Zomato Clone Application</description>
+    <name>Flavor Fleet</name>
+    <description>Flavor Fleet - Food Ordering Backend Application</description>
     <packaging>jar</packaging>
 
     <properties>
         <java.version>17</java.version>
-        <lombok.version>1.18.30</lombok.version>
     </properties>
 
     <dependencies>
@@ -55,7 +55,6 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
             <optional>true</optional>
         </dependency>
 
@@ -83,24 +82,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-
-            <!-- Maven Compiler Plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.1</version>
-                <configuration>
-                    <source>17</source>
-                    <target>17</target>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${lombok.version}</version>
-                        </path>
-                    </annotationProcessorPaths>
-                </configuration>
             </plugin>
 
         </plugins>

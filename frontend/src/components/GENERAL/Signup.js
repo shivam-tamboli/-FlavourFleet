@@ -48,7 +48,7 @@ class Signup extends Component {
 
         const admincode = document.getElementById("signupadmincode").value.trim();
 
-        axios.post("http://localhost:9090/zomato/user/signup", {
+        axios.post("http://localhost:9090/flavorfleet/user/signup", {
             name: fname + " " + lname,
             phonenumber: phone,
             address: address,

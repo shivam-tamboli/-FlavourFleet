@@ -42,7 +42,7 @@ export class Welcome extends Component {
             </div>
           </div>
 
-          <div id='ZomatoTitle'>
+          <div id='FleetTitle'>
             <h1 className="hero-brand">Flavour<span className="brand-dot">Fleet</span></h1>
             <p className="hero-sub">Discover the best food & drinks, delivered fast to your doorstep</p>
             <div className="hero-search">

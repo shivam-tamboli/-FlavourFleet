@@ -25,7 +25,7 @@ class AddFooditem extends Component {
 
         const finalImage = image || getFoodImage(foodName, 0);
 
-        axios.post("http://localhost:9090/zomato/admin/add-fooditems", {
+        axios.post("http://localhost:9090/flavorfleet/admin/add-fooditems", {
             restaurantId: Number(this.restaurantId),
             foodName, description,
             price: Number(price),

@@ -106,9 +106,9 @@
 │                                                           │
 │   ┌───────────────────────────────────────────────────┐   │
 │   │                   Controllers                     │   │
-│   │   UserController   (/zomato/user/*)               │   │
-│   │   AdminController  (/zomato/admin/*)              │   │
-│   │   RestaurantController (/zomato/*)                │   │
+│   │   UserController   (/flavorfleet/user/*)               │   │
+│   │   AdminController  (/flavorfleet/admin/*)              │   │
+│   │   RestaurantController (/flavorfleet/*)                │   │
 │   └─────────────────────────┬─────────────────────────┘   │
 │                             │                             │
 │   ┌─────────────────────────┴─────────────────────────┐   │
@@ -157,10 +157,10 @@
 
 ```bash
 # Step 1: Clone the project
-git clone https://github.com/shivam-tamboli/Zomato_clone.git
+git clone https://github.com/shivam-tamboli/FlavourFleet.git
 
 # Step 2: Navigate into the project folder
-cd Zomato_clone
+cd FlavourFleet
 ```
 
 ---
@@ -170,7 +170,7 @@ cd Zomato_clone
 ### Step 1: Create the database
 
 ```sql
-CREATE DATABASE zomato_clone;
+CREATE DATABASE flavorfleet;
 ```
 
 > Hibernate will auto-create all tables on first run (`spring.jpa.hibernate.ddl-auto=update`).
@@ -180,7 +180,7 @@ CREATE DATABASE zomato_clone;
 Edit `backend/src/main/resources/application.properties`:
 
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/zomato_clone
+spring.datasource.url=jdbc:mysql://localhost:3306/flavorfleet
 spring.datasource.username=root
 spring.datasource.password=YOUR_PASSWORD_HERE
 ```
@@ -282,9 +282,9 @@ Admin dropdown also shows an **Admin** role badge.
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/zomato/get-restaurants` | Get all restaurants |
+| `GET` | `/flavorfleet/get-restaurants` | Get all restaurants |
 
-### User Endpoints (`/zomato/user/`)
+### User Endpoints (`/flavorfleet/user/`)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -303,7 +303,7 @@ Admin dropdown also shows an **Admin** role badge.
 | `GET` | `/get-all-food-items` | Get all food items |
 | `GET` | `/get-all-restaurants` | Get all restaurants |
 
-### Admin Endpoints (`/zomato/admin/`)
+### Admin Endpoints (`/flavorfleet/admin/`)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -323,12 +323,12 @@ You can test all APIs using **Postman**. Here are some examples:
 ### Check if backend is running
 
 - **Method:** `GET`
-- **URL:** `http://localhost:9090/zomato/get-restaurants`
+- **URL:** `http://localhost:9090/flavorfleet/get-restaurants`
 
 ### Signup
 
 - **Method:** `POST`
-- **URL:** `http://localhost:9090/zomato/user/signup`
+- **URL:** `http://localhost:9090/flavorfleet/user/signup`
 - **Body (JSON):**
 ```json
 {
@@ -344,7 +344,7 @@ You can test all APIs using **Postman**. Here are some examples:
 ### Admin Signup (with admin code)
 
 - **Method:** `POST`
-- **URL:** `http://localhost:9090/zomato/user/signup`
+- **URL:** `http://localhost:9090/flavorfleet/user/signup`
 - **Body (JSON):**
 ```json
 {
@@ -361,7 +361,7 @@ You can test all APIs using **Postman**. Here are some examples:
 ### Login
 
 - **Method:** `POST`
-- **URL:** `http://localhost:9090/zomato/user/login`
+- **URL:** `http://localhost:9090/flavorfleet/user/login`
 - **Body (JSON):**
 ```json
 {
@@ -374,7 +374,7 @@ You can test all APIs using **Postman**. Here are some examples:
 ### Get User Profile
 
 - **Method:** `POST`
-- **URL:** `http://localhost:9090/zomato/user/get-profile`
+- **URL:** `http://localhost:9090/flavorfleet/user/get-profile`
 - **Body (JSON):**
 ```json
 {
@@ -394,7 +394,7 @@ You can test all APIs using **Postman**. Here are some examples:
 ### Search Food Items
 
 - **Method:** `POST`
-- **URL:** `http://localhost:9090/zomato/user/search-by-fooditem`
+- **URL:** `http://localhost:9090/flavorfleet/user/search-by-fooditem`
 - **Body (JSON):**
 ```json
 {
@@ -407,7 +407,7 @@ You can test all APIs using **Postman**. Here are some examples:
 ## 📂 Project Structure
 
 ```
-Zomato_clone/
+FlavourFleet/
 │
 ├── backend/                                          # Spring Boot Backend
 │   ├── pom.xml                                       # Maven config + Lombok annotation processing
@@ -415,8 +415,8 @@ Zomato_clone/
 │   ├── mvnw.cmd                                      # Maven wrapper (Windows)
 │   └── src/
 │       └── main/
-│           ├── java/com/zomato/clone/backend/
-│           │   ├── ZomatoCloneApplication.java       # Main Spring Boot entry point
+│           ├── java/com/flavorfleet/backend/
+│           │   ├── FlavorFleetApplication.java       # Main Spring Boot entry point
 │           │   │
 │           │   ├── config/
 │           │   │   └── DataLoader.java               # Seeds sample data on startup

@@ -89,7 +89,7 @@ export default class ShowUserRestaurantFoods extends Component {
 
         console.log("📤 Fetching foods for restaurant:", requestData);
 
-        axios.post("http://localhost:9090/zomato/user/get-fooditems", requestData)
+        axios.post("http://localhost:9090/flavorfleet/user/get-fooditems", requestData)
             .then((resp)=>{
                 console.log("✅ Food items response:", resp.data);
 

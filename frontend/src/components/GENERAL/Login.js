@@ -25,7 +25,7 @@ class Login extends Component {
 
         this.setState({ loading: true, error1: '', error2: '' });
 
-        axios.post("http://localhost:9090/zomato/user/login", { phonenumber: phonenum, password })
+        axios.post("http://localhost:9090/flavorfleet/user/login", { phonenumber: phonenum, password })
             .then((res) => {
                 this.setState({ loading: false });
                 if (res.data === "phone") {

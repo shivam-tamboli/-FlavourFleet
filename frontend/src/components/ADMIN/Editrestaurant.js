@@ -34,7 +34,7 @@ class AdminEditRest extends Component {
         if (!restaurantName || !restaurantAddress) { alert("Fill all fields"); return; }
 
         this.setState({ loading: true });
-        axios.post("http://localhost:9090/zomato/admin/edit-restaurant", {
+        axios.post("http://localhost:9090/flavorfleet/admin/edit-restaurant", {
             restaurantId: Number(this.restaurantId),
             restaurantName, restaurantAddress,
             restaurantImages: imagesLink.filter(l => l && l.trim())

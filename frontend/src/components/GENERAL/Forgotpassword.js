@@ -29,7 +29,7 @@ class Forgotpassword extends Component {
             return;
         }
         this.setState({ loading: true, error1: '' });
-        axios.post("http://localhost:9090/zomato/user/forgot-password", { phonenumber: num })
+        axios.post("http://localhost:9090/flavorfleet/user/forgot-password", { phonenumber: num })
             .then((resp) => {
                 this.setState({ loading: false });
                 if (resp.data === "phone") {
@@ -52,7 +52,7 @@ class Forgotpassword extends Component {
         if (hasError) return;
 
         this.setState({ loading: true, error2: '', error3: '' });
-        axios.post("http://localhost:9090/zomato/user/reset-password", {
+        axios.post("http://localhost:9090/flavorfleet/user/reset-password", {
             phonenumber: this.state.phonenum,
             secretquestion: this.state.question,
             answer: ans,

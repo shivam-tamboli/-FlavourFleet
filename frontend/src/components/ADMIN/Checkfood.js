@@ -20,7 +20,7 @@ class AdminCheckFood extends Component {
     }
 
     fetchFoodItems = () => {
-        axios.get("http://localhost:9090/zomato/get-fooditems", { params: { restaurantId: this.restaurantId } })
+        axios.get("http://localhost:9090/flavorfleet/get-fooditems", { params: { restaurantId: this.restaurantId } })
             .then((resp) => this.setState({ listOfFoods: resp.data || [], loading: false }))
             .catch(() => this.setState({ loading: false }));
     }
@@ -35,7 +35,7 @@ class AdminCheckFood extends Component {
 
     deleteFood = (foodItemId) => {
         if (!window.confirm("Delete this food item?")) return;
-        axios.post("http://localhost:9090/zomato/admin/delete-fooditems", { foodItemId: String(foodItemId) })
+        axios.post("http://localhost:9090/flavorfleet/admin/delete-fooditems", { foodItemId: String(foodItemId) })
             .then(() => this.fetchFoodItems())
             .catch((err) => alert("Failed: " + (err.response?.data || err.message)));
     }

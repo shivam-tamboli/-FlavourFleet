@@ -37,7 +37,7 @@ class EditFooditem extends Component {
         this.setState({ loading: true });
         const finalImage = image || getFoodImage(foodName, 0);
 
-        axios.post("http://localhost:9090/zomato/admin/edit-fooditems", {
+        axios.post("http://localhost:9090/flavorfleet/admin/edit-fooditems", {
             fooditemid: this.foodItemId,
             restaurantId: this.restaurantId,
             foodName, description,

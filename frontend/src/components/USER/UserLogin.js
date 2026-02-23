@@ -19,7 +19,7 @@ class UserLogin extends Component {
 
     componentDidMount() {
         if (this.userPhoneNumber) {
-            axios.post(`${API_BASE_URL}/zomato/user/get-profile`, { phonenumber: this.userPhoneNumber })
+            axios.post(`${API_BASE_URL}/flavorfleet/user/get-profile`, { phonenumber: this.userPhoneNumber })
                 .then((resp) => {
                     if (resp.data && resp.data.name) {
                         this.setState({
@@ -59,7 +59,7 @@ class UserLogin extends Component {
     }
 
     logout = () => {
-        axios.post(`${API_BASE_URL}/zomato/user/logout`, { phonenumber: this.userPhoneNumber })
+        axios.post(`${API_BASE_URL}/flavorfleet/user/logout`, { phonenumber: this.userPhoneNumber })
             .then(() => {})
             .catch(() => {});
         localStorage.removeItem('userPhoneNumber');

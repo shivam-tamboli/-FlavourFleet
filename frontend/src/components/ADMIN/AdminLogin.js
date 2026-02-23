@@ -21,7 +21,7 @@ class AdminLogin extends Component {
         this.fetchRestaurants();
         // Fetch admin profile
         if (this.phone) {
-            axios.post("http://localhost:9090/zomato/user/get-profile", { phonenumber: this.phone })
+            axios.post("http://localhost:9090/flavorfleet/user/get-profile", { phonenumber: this.phone })
                 .then((resp) => {
                     if (resp.data && resp.data.name) {
                         this.setState({ adminName: resp.data.name, adminPhone: resp.data.phone });
@@ -33,7 +33,7 @@ class AdminLogin extends Component {
 
     fetchRestaurants = () => {
         this.setState({ loading: true, error: null });
-        axios.get('http://localhost:9090/zomato/get-restaurants')
+        axios.get('http://localhost:9090/flavorfleet/get-restaurants')
             .then((resp) => {
                 this.setState({ listOfRest: resp.data || [], loading: false });
             })
@@ -53,13 +53,13 @@ class AdminLogin extends Component {
 
     deleteRestaurant = (restaurantId) => {
         if (!window.confirm("Are you sure you want to delete this restaurant and all its food items?")) return;
-        axios.post('http://localhost:9090/zomato/admin/delete-restaurant', { restaurantId: Number(restaurantId) })
+        axios.post('http://localhost:9090/flavorfleet/admin/delete-restaurant', { restaurantId: Number(restaurantId) })
             .then(() => this.fetchRestaurants())
             .catch(() => alert("Failed to delete restaurant"));
     };
 
     logout = () => {
-        axios.post('http://localhost:9090/zomato/user/logout', { phonenumber: this.phone }).catch(() => {});
+        axios.post('http://localhost:9090/flavorfleet/user/logout', { phonenumber: this.phone }).catch(() => {});
         localStorage.removeItem('ap');
         this.props.history.push('/');
     };
