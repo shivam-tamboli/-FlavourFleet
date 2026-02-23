@@ -157,10 +157,10 @@
 
 ```bash
 # Step 1: Clone the project
-git clone https://github.com/shivam-tamboli/FlavourFleet.git
+git clone https://github.com/shivam-tamboli/-FlavourFleet.git
 
 # Step 2: Navigate into the project folder
-cd FlavourFleet
+cd -FlavourFleet
 ```
 
 ---
