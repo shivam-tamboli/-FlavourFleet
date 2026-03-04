@@ -180,85 +180,76 @@ public class UserService {
 
 
     public ResponseEntity<String> placeOrder(Map entity) {
-        // ✅ ADD DEBUG: Print all received fields
+
         System.out.println("=== PLACE ORDER DEBUG ===");
-        entity.forEach((key, value) -> {
-            System.out.println("Key: " + key + ", Value: " + value + ", Type: " + (value != null ? value.getClass().getSimpleName() : "null"));
-            if (value instanceof ArrayList) {
-                System.out.println("  Array contents: " + value);
-            }
-        });
+        entity.forEach((key, value) ->
+                System.out.println("Key: " + key + " Value: " + value));
         System.out.println("=========================");
 
-        Optional<RestaurantInfo> restaurantInfo = restaurantInfoRepo.findById((Integer) entity.get("restaurantid"));
-        RestaurantInfo rest = restaurantInfo.get();
+        // ---------- RESTAURANT ----------
+        Integer restaurantId = (Integer) entity.get("restaurantid");
+
+        RestaurantInfo rest = restaurantInfoRepo.findById(restaurantId)
+                .orElseThrow(() -> new RuntimeException("Restaurant not found"));
+
+        // ---------- USER ----------
+        String phoneNumber = (String) entity.get("phonenumber");
+
+        UserInfo user = userInfoRepo.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // ---------- CREATE ORDER ----------
         OrderInfo orderInfo = new OrderInfo();
-        orderInfo.setRestaurantId((Integer) entity.get("restaurantid"));
-        orderInfo.setRestaurantName((String) entity.get("restaurantname"));
-        Optional<UserInfo> userInfo = userInfoRepo.findByPhoneNumber((String) entity.get("phonenumber"));
-        UserInfo user = userInfo.get();
+        orderInfo.setRestaurantId(rest.getRestaurantId());
+        orderInfo.setRestaurantName(rest.getRestaurantName());
         orderInfo.setUserId(user.getUserId());
         orderInfo.setDeliveryAddress((String) entity.get("deliveryaddress"));
-        orderInfo.setTotalAmount((Integer) entity.get("totalamount")); // ✅ FIXED: Changed to lowercase
-        orderInfoRepo.save(orderInfo);
 
-        // ✅ ADD DEBUG: Check each array before processing
-        System.out.println("=== ARRAY DEBUG ===");
-        ArrayList<String> fooditemid = (ArrayList) entity.get("fooditemid"); // ✅ FIXED: Changed to lowercase
-        System.out.println("fooditemid: " + fooditemid);
+        // ---------- ARRAYS ----------
+        ArrayList<String> fooditemid = (ArrayList<String>) entity.get("fooditemid");
+        ArrayList<String> foodname = (ArrayList<String>) entity.get("foodname");
+        ArrayList<String> quantity = (ArrayList<String>) entity.get("quantity");
 
-        ArrayList<String> foodname = (ArrayList) entity.get("foodname"); // ✅ FIXED: Changed to lowercase
-        System.out.println("foodname: " + foodname);
-
-        ArrayList<String> amount = (ArrayList) entity.get("amount");
-        System.out.println("amount: " + amount);
-
-        ArrayList<String> quantity = (ArrayList) entity.get("quantity");
-        System.out.println("quantity: " + quantity);
-        System.out.println("===================");
-
-        // ✅ ADD VALIDATION: Check if arrays are null or empty
-        if (fooditemid == null || foodname == null || amount == null || quantity == null) {
-            System.out.println("ERROR: One or more required arrays are null");
-            return new ResponseEntity<>("Invalid order data: missing arrays", HttpStatus.BAD_REQUEST);
+        if (fooditemid == null || quantity == null || fooditemid.isEmpty()) {
+            return new ResponseEntity<>("Invalid order data", HttpStatus.BAD_REQUEST);
         }
 
-        if (fooditemid.isEmpty()) {
-            System.out.println("ERROR: No food items in order");
-            return new ResponseEntity<>("No food items selected", HttpStatus.BAD_REQUEST);
-        }
+        int totalAmount = 0;
 
-        ListIterator<String> ll = fooditemid.listIterator();
-        ListIterator<String> name = foodname.listIterator();
-        ListIterator<String> famount = amount.listIterator();
-        ListIterator<String> fquantity = quantity.listIterator();
+        // ---------- PROCESS ITEMS ----------
+        for (int i = 0; i < fooditemid.size(); i++) {
 
-        while (ll.hasNext()) {
+            Integer foodId = Integer.parseInt(fooditemid.get(i));
+            Integer qty = Integer.parseInt(quantity.get(i));
+
+            FoodItem foodItem = foodItemRepo.findById(foodId)
+                    .orElseThrow(() -> new RuntimeException("Food item not found"));
+
             OrderFoodItems orderFoodItems = new OrderFoodItems();
-            String s = ll.next();
-            System.out.println("Processing fooditemid: " + s);
-            orderFoodItems.setFoodItemId(Integer.parseInt(s));
 
-            s = name.next();
-            System.out.println("Processing foodname: " + s);
-            orderFoodItems.setFoodName(s);
+            orderFoodItems.setFoodItemId(foodId);
+            orderFoodItems.setFoodName(foodItem.getFoodName());
+            orderFoodItems.setQuantity(qty);
 
-            s = famount.next();
-            System.out.println("Processing amount: " + s);
-            orderFoodItems.setAmount(Integer.parseInt(s));
+            // ✅ CALCULATE AMOUNT FROM DATABASE (SECURE)
+            int amount = foodItem.getPrice() * qty;
+            orderFoodItems.setAmount(amount);
 
-            s = fquantity.next();
-            System.out.println("Processing quantity: " + s);
-            orderFoodItems.setQuantity(Integer.parseInt(s));
+            totalAmount += amount;
 
             orderFoodItems.setOrderInfo(orderInfo);
             orderInfo.getOrderFoodItems().add(orderFoodItems);
-            orderInfoRepo.save(orderInfo);
         }
 
-        System.out.println("*******************************" + orderInfo);
+        // ---------- SET TOTAL ----------
+        orderInfo.setTotalAmount(totalAmount);
 
-        return ResponseEntity.ok().body("success");
+        // ---------- SAVE ONCE ----------
+        orderInfoRepo.save(orderInfo);
+
+        System.out.println("Order Saved Successfully: " + orderInfo);
+
+        return ResponseEntity.ok("success");
     }
 
     public ResponseEntity<String> rateOrder(Map<String, Object> entity) {

@@ -11,7 +11,7 @@
 
 > *Discover the best food & drinks, delivered fast to your doorstep*
 
-[Getting Started](#-getting-started) · [Features](#-features) · [API Reference](#-api-reference) · [Architecture](#-architecture)
+[Getting Started](#-getting-started) · [Features](#-features) · [API Reference](#-api-reference) · [Architecture](#-full-system-architecture)
 
 ---
 
@@ -22,14 +22,20 @@
 - [About](#-about)
 - [Tech Stack](#-tech-stack)
 - [Features](#-features)
-- [Architecture](#-architecture)
+- [Full System Architecture](#-full-system-architecture)
+  - [High-Level Architecture](#-high-level-architecture-system-context)
+  - [Low-Level Architecture](#-low-level-architecture-backend-internals)
+  - [Sequence Diagram — User Login](#-sequence-diagram--user-login-flow)
+  - [Sequence Diagram — Place Order](#-sequence-diagram--place-order-flow)
+  - [Sequence Diagram — Admin Add Restaurant](#-sequence-diagram--admin-add-restaurant-flow)
+  - [Entity Relationship Diagram](#️-entity-relationship-diagram)
 - [Getting Started](#-getting-started)
 - [Database Setup](#-database-setup)
 - [Running the Application](#-running-the-application)
 - [API Reference](#-api-reference)
 - [Postman Testing](#-postman-testing)
-- [Project Structure](#-project-structure)
 - [User Roles](#-user-roles)
+- [Configuration](#-configuration)
 
 ---
 
@@ -79,65 +85,410 @@
 
 ---
 
-## 🏗 Architecture
+## 🏗 Full System Architecture
 
+### 🔵 High-Level Architecture (System Context)
+
+> Shows the big picture — users, systems, and external services.
+
+```mermaid
+graph TB
+    subgraph External Services
+        UNSPLASH["🖼️ Unsplash CDN<br/><i>Food & Restaurant Images</i>"]
+        GFONTS["🔤 Google Fonts API<br/><i>Space Grotesk · Inter</i>"]
+    end
+
+    CUSTOMER["👤 Customer<br/><i>Browse · Order · Rate</i>"]
+    ADMIN["🛡️ Admin<br/><i>Manage Restaurants & Food</i>"]
+
+    subgraph FlavourFleet Platform
+        REACT["⚛️ React Frontend<br/><i>React 18 · Router v5 · Axios</i><br/>Port 3000"]
+        SPRING["🍃 Spring Boot Backend<br/><i>Java 21 · Spring Boot 3.2.5</i><br/><i>Spring Data JPA · Hibernate</i><br/>Port 9090"]
+        MYSQL[("🗄️ MySQL 8.0<br/><i>8 Tables · Auto Schema</i>")]
+    end
+
+    CUSTOMER -- "Uses via Browser" --> REACT
+    ADMIN -- "Uses via Browser" --> REACT
+    REACT -- "REST API<br/>JSON / HTTP" --> SPRING
+    SPRING -- "JPA / Hibernate<br/>JDBC" --> MYSQL
+    REACT -. "Loads Images<br/>HTTPS" .-> UNSPLASH
+    REACT -. "Loads Fonts<br/>HTTPS" .-> GFONTS
+
+    style REACT fill:#61DAFB,stroke:#333,color:#000
+    style SPRING fill:#6DB33F,stroke:#333,color:#fff
+    style MYSQL fill:#4479A1,stroke:#333,color:#fff
+    style UNSPLASH fill:#E8E8E8,stroke:#999,color:#333
+    style GFONTS fill:#E8E8E8,stroke:#999,color:#333
+    style CUSTOMER fill:#FFD93D,stroke:#333,color:#000
+    style ADMIN fill:#FF6B6B,stroke:#333,color:#fff
 ```
-┌─────────────────────────────────────────────────────────┐
-│                     CLIENT  (Browser)                   │
-│                                                         │
-│   React 18  +  React Router v5  +  Axios                │
-│                                                         │
-│   ┌─────────────┐  ┌─────────────┐  ┌─────────────┐     │
-│   │   GENERAL   │  │    USER     │  │    ADMIN    │     │
-│   │  Welcome    │  │  Restrnts   │  │  Dashboard  │     │
-│   │  Login      │  │  Menu       │  │  Add Rest   │     │
-│   │  Signup     │  │  Search     │  │  Edit Rest  │     │
-│   │  ForgotPwd  │  │  Order      │  │  Add Food   │     │
-│   │             │  │  History    │  │  Edit Food  │     │
-│   │             │  │  Rating     │  │  View Menu  │     │
-│   └─────────────┘  └─────────────┘  └─────────────┘     │
-└────────────────────────────┬────────────────────────────┘
-                             │
-                             │  HTTP  (REST API)
-                             │  Port 3000 → 9090
-                             │
-┌────────────────────────────┴──────────────────────────────┐
-│                   SERVER  (Spring Boot)                   │
-│                                                           │
-│   ┌───────────────────────────────────────────────────┐   │
-│   │                   Controllers                     │   │
-│   │   UserController   (/flavorfleet/user/*)               │   │
-│   │   AdminController  (/flavorfleet/admin/*)              │   │
-│   │   RestaurantController (/flavorfleet/*)                │   │
-│   └─────────────────────────┬─────────────────────────┘   │
-│                             │                             │
-│   ┌─────────────────────────┴─────────────────────────┐   │
-│   │                    Services                       │   │
-│   │   UserService · AdminService · RestaurantService  │   │
-│   │   ValidUser                                       │   │
-│   └─────────────────────────┬─────────────────────────┘   │
-│                             │                             │
-│   ┌─────────────────────────┴─────────────────────────┐   │
-│   │                JPA Repositories                   │   │
-│   │   UserInfoRepo · RestaurantInfoRepo · FoodItemRepo│   │
-│   │   OrderInfoRepo · OrderFoodItemsRepo              │   │
-│   │   RestaurantRatingRepo · FoodItemRatingRepo       │   │
-│   │   RestaurantImagesRepo                            │   │
-│   └─────────────────────────┬─────────────────────────┘   │
-│                             │                             │
-└────────────────────────────┬──────────────────────────────┘
-                             │
-                             │  JDBC
-                             │
-┌────────────────────────────┴──────────────────────────────┐
-│                     MySQL Database                        │
-│                                                           │
-│   Tables:  user_info · restaurant_info · food_items       │
-│            restaurant_images · order_info                 │
-│            order_food_items · restaurant_rating           │
-│            food_item_rating                               │
-└───────────────────────────────────────────────────────────┘
+
+---
+
+### 🟢 Low-Level Architecture (Backend Internals)
+
+> Deep dive into the Spring Boot backend — layers, classes, and data flow.
+
+```mermaid
+graph TB
+    CLIENT["⚛️ React Client<br/>Port 3000"]
+
+    subgraph SPRING_BOOT ["🍃 Spring Boot Server — Port 9090"]
+
+        subgraph FILTER_LAYER ["Filter Layer"]
+            CORS["CORSFilter<br/><i>Allow cross-origin :3000</i>"]
+        end
+
+        subgraph CONTROLLER_LAYER ["Controller Layer — REST Endpoints"]
+            RC["RestaurantController<br/><code>GET /flavorfleet/*</code>"]
+            UC["UserController<br/><code>POST /flavorfleet/user/*</code>"]
+            AC["AdminController<br/><code>POST /flavorfleet/admin/*</code>"]
+        end
+
+        subgraph SERVICE_LAYER ["Service Layer — Business Logic"]
+            RS["RestaurantService<br/><i>Public restaurant data</i>"]
+            US["UserService<br/><i>Auth · Search · Orders · Ratings · Profile</i>"]
+            AS["AdminService<br/><i>Restaurant & Food CRUD</i>"]
+            VU["ValidUser<br/><i>Phone & password validation</i>"]
+        end
+
+        subgraph REPO_LAYER ["Repository Layer — Spring Data JPA"]
+            UIR["UserInfoRepo"]
+            RIR["RestaurantInfoRepo"]
+            FIR["FoodItemRepo"]
+            OIR["OrderInfoRepo"]
+            OFIR["OrderFoodItemsRepo"]
+            RRR["RestaurantRatingRepo"]
+            FIRR["FoodItemRatingRepo"]
+            RIMR["RestaurantImagesRepo"]
+        end
+
+        subgraph DATA_SEED ["Startup"]
+            DL["DataLoader<br/><i>CommandLineRunner</i><br/><i>Seeds sample data</i>"]
+        end
+    end
+
+    subgraph MYSQL_DB ["🗄️ MySQL 8.0 Database"]
+        T1["user_info"]
+        T2["restaurant_info"]
+        T3["food_items"]
+        T4["restaurant_images"]
+        T5["order_info"]
+        T6["order_food_items"]
+        T7["restaurant_rating"]
+        T8["food_item_rating"]
+    end
+
+    CLIENT -- "HTTP Request" --> CORS
+    CORS --> RC & UC & AC
+    RC --> RS
+    UC --> US
+    UC --> VU
+    AC --> AS
+    RS --> RIR & FIR & RIMR
+    US --> UIR & RIR & FIR & OIR & OFIR & RRR & FIRR
+    AS --> RIR & FIR & RIMR
+    DL --> RIR
+
+    UIR --> T1
+    RIR --> T2
+    FIR --> T3
+    RIMR --> T4
+    OIR --> T5
+    OFIR --> T6
+    RRR --> T7
+    FIRR --> T8
+
+    style CLIENT fill:#61DAFB,stroke:#333,color:#000
+    style CORS fill:#F39C12,stroke:#333,color:#000
+    style RC fill:#27AE60,stroke:#333,color:#fff
+    style UC fill:#27AE60,stroke:#333,color:#fff
+    style AC fill:#27AE60,stroke:#333,color:#fff
+    style RS fill:#3498DB,stroke:#333,color:#fff
+    style US fill:#3498DB,stroke:#333,color:#fff
+    style AS fill:#3498DB,stroke:#333,color:#fff
+    style VU fill:#3498DB,stroke:#333,color:#fff
+    style DL fill:#9B59B6,stroke:#333,color:#fff
 ```
+
+---
+
+### 🔶 Sequence Diagram — User Login Flow
+
+> Shows the complete request lifecycle for user authentication.
+
+```mermaid
+sequenceDiagram
+    actor Customer
+    participant React as ⚛️ React Frontend
+    participant Axios as Axios HTTP Client
+    participant CORS as CORSFilter
+    participant UC as UserController
+    participant VU as ValidUser
+    participant US as UserService
+    participant Repo as UserInfoRepo
+    participant DB as 🗄️ MySQL
+
+    Customer->>React: Enter phone & password, click Login
+    React->>Axios: POST /flavorfleet/user/login
+    Axios->>CORS: HTTP Request + Origin header
+    CORS->>CORS: Set Access-Control headers
+    CORS->>UC: Forward request
+
+    UC->>VU: isPhoneNumberUnique(phone)
+    VU->>Repo: findByPhoneNumber(phone)
+    Repo->>DB: SELECT * FROM user_info WHERE phone = ?
+    DB-->>Repo: UserInfo row
+    Repo-->>VU: Optional<UserInfo>
+    VU-->>UC: false (phone exists)
+
+    UC->>VU: isPasswordValid(phone, password)
+    VU->>Repo: findByPhoneNumber(phone)
+    Repo->>DB: SELECT * FROM user_info WHERE phone = ?
+    DB-->>Repo: UserInfo row
+    Repo-->>VU: Optional<UserInfo>
+    VU-->>UC: true (password matches)
+
+    UC->>US: login(loginDetails)
+    US->>Repo: findByPhoneNumber(phone)
+    Repo->>DB: SELECT * FROM user_info
+    DB-->>Repo: UserInfo row
+    US->>US: Set loginStatus = true
+    US->>Repo: save(userInfo)
+    Repo->>DB: UPDATE user_info SET login_status = 1
+
+    alt Role = 0 (Admin)
+        US-->>UC: "Success_admin"
+    else Role = 1 (Customer)
+        US-->>UC: "Success_user"
+    end
+
+    UC-->>CORS: ResponseEntity<String>
+    CORS-->>Axios: HTTP 200 + JSON
+    Axios-->>React: Response data
+
+    alt Success_admin
+        React->>React: Navigate to /Admin
+    else Success_user
+        React->>React: Navigate to /Userrestaurant
+    end
+
+    React-->>Customer: Display Dashboard / Restaurants
+```
+
+---
+
+### 🟣 Sequence Diagram — Place Order Flow
+
+> Complete order placement lifecycle from UI to database.
+
+```mermaid
+sequenceDiagram
+    actor Customer
+    participant React as ⚛️ React Frontend
+    participant Axios as Axios HTTP Client
+    participant CORS as CORSFilter
+    participant UC as UserController
+    participant US as UserService
+    participant UIR as UserInfoRepo
+    participant RIR as RestaurantInfoRepo
+    participant FIR as FoodItemRepo
+    participant OIR as OrderInfoRepo
+    participant DB as 🗄️ MySQL
+
+    Customer->>React: Select food items, set qty, click Place Order
+    React->>Axios: POST /flavorfleet/user/place-order
+    Note right of React: Body: restaurantid, phonenumber,<br/>fooditemid[], foodname[],<br/>quantity[], deliveryaddress
+    Axios->>CORS: HTTP Request
+    CORS->>UC: Forward request
+    UC->>US: placeOrder(entity)
+
+    US->>RIR: findById(restaurantId)
+    RIR->>DB: SELECT * FROM restaurant_info WHERE id = ?
+    DB-->>RIR: RestaurantInfo
+    RIR-->>US: RestaurantInfo
+
+    US->>UIR: findByPhoneNumber(phone)
+    UIR->>DB: SELECT * FROM user_info WHERE phone = ?
+    DB-->>UIR: UserInfo
+    UIR-->>US: UserInfo
+
+    US->>US: Create OrderInfo entity
+
+    loop For each food item in order
+        US->>FIR: findById(foodItemId)
+        FIR->>DB: SELECT * FROM food_items WHERE id = ?
+        DB-->>FIR: FoodItem
+        FIR-->>US: FoodItem
+        US->>US: Create OrderFoodItems<br/>Calculate amount = price × qty
+        US->>US: Add to OrderInfo.orderFoodItems
+    end
+
+    US->>US: Set totalAmount on OrderInfo
+    US->>OIR: save(orderInfo)
+    OIR->>DB: INSERT INTO order_info + order_food_items
+    DB-->>OIR: Saved with generated IDs
+
+    US-->>UC: ResponseEntity "success"
+    UC-->>CORS: HTTP 200
+    CORS-->>Axios: JSON Response
+    Axios-->>React: "success"
+    React-->>Customer: Show order confirmation
+```
+
+---
+
+### 🟡 Sequence Diagram — Admin Add Restaurant Flow
+
+> Admin creates a new restaurant with images.
+
+```mermaid
+sequenceDiagram
+    actor Admin
+    participant React as ⚛️ React Frontend
+    participant Axios as Axios HTTP Client
+    participant CORS as CORSFilter
+    participant AC as AdminController
+    participant AS as AdminService
+    participant RIR as RestaurantInfoRepo
+    participant DB as 🗄️ MySQL
+
+    Admin->>React: Fill restaurant name, address, images
+    React->>Axios: POST /flavorfleet/admin/add-restaurant
+    Note right of React: Body: restaurantName,<br/>restaurantAddress,<br/>restaurantimages[]
+    Axios->>CORS: HTTP Request
+    CORS->>AC: Forward request
+    AC->>AS: addRestaurant(entity)
+
+    AS->>RIR: findByRestaurantNameAndAddress(name, addr)
+    RIR->>DB: SELECT * FROM restaurant_info WHERE name=? AND addr=?
+    DB-->>RIR: Empty result
+
+    alt Restaurant already exists
+        AS-->>AC: "address" (duplicate)
+    else New restaurant
+        AS->>AS: Create RestaurantInfo entity
+        loop For each image URL
+            AS->>AS: Create RestaurantImages entity
+            AS->>AS: Link image → restaurant
+        end
+        AS->>RIR: save(restaurantInfo)
+        RIR->>DB: INSERT INTO restaurant_info + restaurant_images
+        DB-->>RIR: Saved
+        AS-->>AC: "success"
+    end
+
+    AC-->>CORS: ResponseEntity
+    CORS-->>Axios: HTTP 200 + JSON
+    Axios-->>React: Response
+    React-->>Admin: Show success / redirect to dashboard
+```
+
+---
+
+### 🗄️ Entity Relationship Diagram
+
+> Database schema with all table relationships.
+
+```mermaid
+erDiagram
+    USER_INFO {
+        int user_id PK
+        string name
+        string phone_number UK
+        string password
+        string address
+        string secret_question
+        string answer
+        int role
+        boolean login_status
+    }
+
+    RESTAURANT_INFO {
+        int restaurant_id PK
+        string restaurant_name
+        string restaurant_address
+        float restaurant_rating
+        int num_of_rating
+    }
+
+    RESTAURANT_IMAGES {
+        int image_id PK
+        string link
+        int restaurant_id FK
+    }
+
+    FOOD_ITEMS {
+        int food_item_id PK
+        string food_name
+        string description
+        int price
+        string image
+        double food_item_rating
+        int num_of_rating
+        int restaurant_id FK
+    }
+
+    ORDER_INFO {
+        int order_id PK
+        int user_id FK
+        int restaurant_id FK
+        string restaurant_name
+        int total_amount
+        string delivery_address
+        int order_flag
+    }
+
+    ORDER_FOOD_ITEMS {
+        int id PK
+        int food_item_id
+        string food_name
+        int quantity
+        int amount
+        int order_id FK
+    }
+
+    RESTAURANT_RATING {
+        int id PK
+        string name
+        int restaurant_id FK
+        string restaurant_name
+        float restaurant_rating
+        string restaurant_review
+    }
+
+    FOOD_ITEM_RATING {
+        int id PK
+        string name
+        int restaurant_id
+        string restaurant_name
+        int food_item_id FK
+        string food_name
+        double food_item_rating
+        string food_item_review
+    }
+
+    RESTAURANT_INFO ||--o{ RESTAURANT_IMAGES : "has"
+    RESTAURANT_INFO ||--o{ FOOD_ITEMS : "has"
+    RESTAURANT_INFO ||--o{ RESTAURANT_RATING : "rated by"
+    FOOD_ITEMS ||--o{ FOOD_ITEM_RATING : "rated by"
+    USER_INFO ||--o{ ORDER_INFO : "places"
+    ORDER_INFO ||--o{ ORDER_FOOD_ITEMS : "contains"
+```
+
+---
+
+### Key Backend Patterns
+
+| Pattern | Implementation |
+|---------|---------------|
+| **Layered Architecture** | Controller → Service → Repository → Database |
+| **DTO Pattern** | `RestaurantDetails`, `FoodItemDetails`, `SearchFoodItem` for API responses |
+| **Entity Relationships** | `@OneToMany` / `@ManyToOne` with JPA & Hibernate (cascade) |
+| **Data Seeding** | `DataLoader` (CommandLineRunner) inserts sample data on startup |
+| **CORS Handling** | Custom `CORSFilter` for cross-origin React ↔ Spring Boot communication |
+| **Input Validation** | `ValidUser` service validates phone numbers & passwords |
+| **Auto Schema** | Hibernate auto-generates tables via `ddl-auto=update` |
 
 ---
 
@@ -404,146 +755,6 @@ You can test all APIs using **Postman**. Here are some examples:
 
 ---
 
-## 📂 Project Structure
-
-```
-FlavourFleet/
-│
-├── backend/                                          # Spring Boot Backend
-│   ├── pom.xml                                       # Maven config + Lombok annotation processing
-│   ├── mvnw                                          # Maven wrapper (Mac/Linux)
-│   ├── mvnw.cmd                                      # Maven wrapper (Windows)
-│   └── src/
-│       └── main/
-│           ├── java/com/flavorfleet/backend/
-│           │   ├── FlavorFleetApplication.java       # Main Spring Boot entry point
-│           │   │
-│           │   ├── config/
-│           │   │   └── DataLoader.java               # Seeds sample data on startup
-│           │   │
-│           │   ├── filter/
-│           │   │   └── CORSFilter.java               # CORS configuration filter
-│           │   │
-│           │   ├── controller/
-│           │   │   ├── UserController.java           # User APIs (auth, orders, ratings, profile)
-│           │   │   ├── AdminController.java          # Admin APIs (CRUD restaurants & food)
-│           │   │   └── RestaurantController.java     # Public APIs (get restaurants)
-│           │   │
-│           │   ├── service/
-│           │   │   ├── UserService.java              # Auth, search, orders, ratings, profile
-│           │   │   ├── AdminService.java             # Restaurant & food item CRUD
-│           │   │   ├── RestaurantService.java        # Restaurant data service
-│           │   │   └── ValidUser.java                # Phone/password validation
-│           │   │
-│           │   ├── models/
-│           │   │   ├── UserInfo.java                 # User entity (role-based)
-│           │   │   ├── RestaurantInfo.java           # Restaurant entity
-│           │   │   ├── RestaurantImages.java         # Restaurant images entity
-│           │   │   ├── RestaurantDetails.java        # Restaurant details DTO
-│           │   │   ├── RestaurantRating.java         # Restaurant rating entity
-│           │   │   ├── FoodItem.java                 # Food item entity
-│           │   │   ├── FoodItemDetails.java          # Food item details DTO
-│           │   │   ├── FoodItemRating.java           # Food item rating entity
-│           │   │   ├── OrderInfo.java                # Order entity
-│           │   │   ├── OrderFoodItems.java           # Order line items entity
-│           │   │   └── SearchFoodItem.java           # Search result DTO
-│           │   │
-│           │   └── repository/
-│           │       ├── UserInfoRepo.java             # User JPA repository
-│           │       ├── RestaurantInfoRepo.java       # Restaurant JPA repository
-│           │       ├── RestaurantImagesRepo.java     # Restaurant images repository
-│           │       ├── RestaurantRatingRepo.java     # Restaurant rating repository
-│           │       ├── FoodItemRepo.java             # Food item repository
-│           │       ├── FoodItemRatingRepo.java       # Food item rating repository
-│           │       ├── OrderInfoRepo.java            # Order repository
-│           │       └── OrderFoodItemsRepo.java       # Order food items repository
-│           │
-│           └── resources/
-│               ├── application.properties            # DB + server config (port 9090)
-│               ├── static/                           # Static resources
-│               └── templates/                        # Template files
-│
-├── frontend/                                         # React Frontend
-│   ├── package.json                                  # npm dependencies
-│   ├── public/
-│   │   ├── index.html                                # HTML entry point
-│   │   ├── manifest.json                             # PWA manifest
-│   │   ├── logo192.png                               # App icon
-│   │   └── IMAGES/                                   # Static images
-│   │       ├── CF/                                   # Country flag images
-│   │       └── SOCIAL/                               # Social media icons
-│   │
-│   └── src/
-│       ├── App.js                                    # Root React component
-│       ├── App.css                                   # Global app styles
-│       ├── index.js                                  # React entry point
-│       ├── index.css                                 # Global CSS variables & resets
-│       ├── reportWebVitals.js                        # Performance monitoring
-│       ├── setupTests.js                             # Test setup
-│       │
-│       ├── config/
-│       │   └── api.js                                # Centralized API base URL config
-│       │
-│       └── components/
-│           ├── Routercomponents.js                   # All route definitions
-│           ├── History.js                            # Browser history config
-│           │
-│           ├── GENERAL/                              # Public pages
-│           │   ├── Welcome.js                        # Landing page
-│           │   ├── Login.js                          # Login page
-│           │   ├── Signup.js                         # Signup page (with admin code)
-│           │   ├── Forgotpassword.js                 # Password recovery
-│           │   ├── Grid.js                           # Grid component
-│           │   └── Label.js                          # Label component
-│           │
-│           ├── ADMIN/                                # Admin pages
-│           │   ├── AdminLogin.js                     # Admin dashboard + profile dropdown
-│           │   ├── Addrestaurant.js                  # Add restaurant form
-│           │   ├── Editrestaurant.js                 # Edit restaurant form
-│           │   ├── Checkfood.js                      # View menu (food card grid)
-│           │   ├── Addfood.js                        # Add food item form
-│           │   └── Editfood.js                       # Edit food item form
-│           │
-│           ├── USER/                                 # Customer pages
-│           │   ├── UserLogin.js                      # User navbar + profile dropdown
-│           │   ├── ShowUserRestaurants.js             # Browse restaurants
-│           │   ├── ShowUserRestaurantFoods.js         # Restaurant menu + add to order
-│           │   ├── ShowUserFoods.js                   # All dishes + search
-│           │   ├── PlaceOrder.js                      # Order placement + add more
-│           │   ├── UserOrders.js                      # Order history + rated status
-│           │   └── RateOrder.js                       # Rate restaurant & food items
-│           │
-│           ├── CSS/                                  # All stylesheets
-│           │   ├── Welcome.css                       # Landing page
-│           │   ├── Login.css                         # Auth pages (login, signup, forgot)
-│           │   ├── Signup.css                        # Signup specific
-│           │   ├── Fpass.css                         # Forgot password
-│           │   ├── Adminlogin.css                    # Admin dashboard + profile dropdown
-│           │   ├── Addres.css                        # Add restaurant form
-│           │   ├── Editres.css                       # Edit restaurant
-│           │   ├── Editrestaurant.css                # Edit restaurant styles
-│           │   ├── Checkfood.css                     # View menu
-│           │   ├── Addfood.css                       # Add food form
-│           │   ├── Editfood.css                      # Edit food form
-│           │   ├── Userlogin.css                     # User navbar + profile dropdown
-│           │   ├── Showuserres.css                   # Browse restaurants
-│           │   ├── Showuserfood.css                  # All dishes
-│           │   ├── Showusrrf.css                     # Restaurant foods
-│           │   ├── Placeorder.css                    # Place order
-│           │   ├── UserOrders.css                    # Order history
-│           │   ├── RateOrder.css                     # Rate order
-│           │   ├── Orderhis.css                      # Order history styles
-│           │   ├── Grid.css                          # Grid styles
-│           │   └── Label.css                         # Label styles
-│           │
-│           └── utils/
-│               └── foodImages.js                     # Smart food image matching (100+ dishes)
-│
-└── README.md
-```
-
----
-
 ## 🔧 Configuration
 
 ### Backend Port
@@ -570,18 +781,6 @@ const API_BASE_URL = "http://localhost:9090";
 
 ---
 
-## 🎨 Design System
-
-| Token | Value | Usage |
-|-------|-------|-------|
-| `--ff-primary` | `#FF6B35` | Buttons, links, branding |
-| `--ff-accent` | `#2ED573` | Success states, ratings |
-| `--ff-text` | `#1B1B2F` | Headings, primary text |
-| `--ff-bg` | `#FAFAFA` | Page backgrounds |
-| `--ff-danger` | `#FF4757` | Errors, delete actions |
-| **Fonts** | Space Grotesk + Inter | Headings + body text |
-
----
 
 ## 📄 License
 
