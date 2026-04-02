@@ -16,8 +16,10 @@ import org.apache.logging.log4j.Logger;
 public class CORSFilter implements Filter {
     private final Logger logger = LogManager.getLogger(CORSFilter.class);
 
+    private static final String ALLOWED_ORIGIN = "http://localhost:3000";
+
     public CORSFilter() {
-        logger.info("SimpleCORSFilter init");
+        logger.info("SimpleCORSFilter init - allowing: " + ALLOWED_ORIGIN);
     }
 
     @Override
@@ -27,12 +29,16 @@ public class CORSFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
 
-        response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
-        response.setHeader("Access-Control-Allow-Credentials", "true");
-        response.setHeader("Access-Control-Allow-Methods", "POST, GET, DELETE, OPTIONS");
-        response.setHeader("Access-Control-Max-Age", "3600");
-        response.setHeader("Access-Control-Allow-Headers",
-                "Access-Control-Allow-Headers, Authorization, Content-Type, Content-Language, Accept, X-Requested-With, remember-me");
+        String origin = request.getHeader("Origin");
+        
+        if (ALLOWED_ORIGIN.equals(origin)) {
+            response.setHeader("Access-Control-Allow-Origin", origin);
+            response.setHeader("Access-Control-Allow-Credentials", "true");
+            response.setHeader("Access-Control-Allow-Methods", "POST, GET, DELETE, OPTIONS");
+            response.setHeader("Access-Control-Max-Age", "3600");
+            response.setHeader("Access-Control-Allow-Headers",
+                    "Access-Control-Allow-Headers, Authorization, Content-Type, Content-Language, Accept, X-Requested-With, remember-me");
+        }
 
         try {
             if (request.getMethod().equals("OPTIONS"))

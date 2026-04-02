@@ -512,7 +512,6 @@ const API_BASE_URL = "http://localhost:9090";
 
 ---
 
-
 ## 📄 License
 
 This project is for educational purposes. Built with ❤️ to demonstrate Java & Spring Boot backend development skills.
