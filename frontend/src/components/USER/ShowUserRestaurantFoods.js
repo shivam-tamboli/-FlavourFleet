@@ -3,6 +3,7 @@ import axios from 'axios';
 import '../CSS/Showusrrf.css'
 import UserLogin from './UserLogin';
 import { getFoodImage } from '../utils/foodImages';
+import API_BASE_URL from '../../config/api';
 
 export default class ShowUserRestaurantFoods extends Component {
     constructor(props){
@@ -89,7 +90,7 @@ export default class ShowUserRestaurantFoods extends Component {
 
         console.log("📤 Fetching foods for restaurant:", requestData);
 
-        axios.post("http://localhost:9090/flavorfleet/user/get-fooditems", requestData)
+        axios.post(`${API_BASE_URL}/flavorfleet/user/get-fooditems`, requestData)
             .then((resp)=>{
                 console.log("✅ Food items response:", resp.data);
 

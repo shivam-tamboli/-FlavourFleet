@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import '../CSS/Showuserres.css'
 import UserLogin from './UserLogin';
+import API_BASE_URL from '../../config/api';
 
 export default class ShowUserRestaurants extends Component {
     constructor(props){
@@ -22,7 +23,7 @@ export default class ShowUserRestaurants extends Component {
     componentDidMount(){
         console.log("Fetching restaurants from backend...");
 
-        axios.get("http://localhost:9090/flavorfleet/user/get-all-restaurants")
+        axios.get(`${API_BASE_URL}/flavorfleet/user/get-all-restaurants`)
             .then((resp)=>{
                 console.log("API Response:", resp.data);
 
@@ -106,7 +107,7 @@ export default class ShowUserRestaurants extends Component {
         }
 
         // Use backend search-by-name API
-        axios.post("http://localhost:9090/flavorfleet/user/search-by-name", { search: searchValue })
+        axios.post(`${API_BASE_URL}/flavorfleet/user/search-by-name`, { search: searchValue })
             .then((resp) => {
                 const results = resp.data.map(r => ({
                     restaurantid: r.restaurantId,

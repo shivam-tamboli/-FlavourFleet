@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';
 import '../CSS/Addres.css'
+import API_BASE_URL from '../../config/api';
 
 class Addrestaurant extends Component {
     constructor(props) {
@@ -18,7 +19,7 @@ class Addrestaurant extends Component {
             ? ["https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop"]
             : imagesLink;
 
-        axios.post("http://localhost:9090/flavorfleet/admin/add-restaurant", {
+        axios.post(`${API_BASE_URL}/flavorfleet/admin/add-restaurant`, {
             restaurantName, restaurantAddress, restaurantimages: images
         })
         .then((resp) => {

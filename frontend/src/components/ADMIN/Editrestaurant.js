@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';
 import '../CSS/Addres.css'
+import API_BASE_URL from '../../config/api';
 
 class AdminEditRest extends Component {
     constructor(props) {
@@ -34,7 +35,7 @@ class AdminEditRest extends Component {
         if (!restaurantName || !restaurantAddress) { alert("Fill all fields"); return; }
 
         this.setState({ loading: true });
-        axios.post("http://localhost:9090/flavorfleet/admin/edit-restaurant", {
+        axios.post(`${API_BASE_URL}/flavorfleet/admin/edit-restaurant`, {
             restaurantId: Number(this.restaurantId),
             restaurantName, restaurantAddress,
             restaurantImages: imagesLink.filter(l => l && l.trim())

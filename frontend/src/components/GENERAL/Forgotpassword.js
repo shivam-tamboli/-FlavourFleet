@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { Link, withRouter } from 'react-router-dom'
 import '../CSS/Login.css'
 import axios from 'axios'
+import API_BASE_URL from '../../config/api';
 
 class Forgotpassword extends Component {
     constructor(props) {
@@ -29,7 +30,7 @@ class Forgotpassword extends Component {
             return;
         }
         this.setState({ loading: true, error1: '' });
-        axios.post("http://localhost:9090/flavorfleet/user/forgot-password", { phonenumber: num })
+        axios.post(`${API_BASE_URL}/flavorfleet/user/forgot-password`, { phonenumber: num })
             .then((resp) => {
                 this.setState({ loading: false });
                 if (resp.data === "phone") {
@@ -52,7 +53,7 @@ class Forgotpassword extends Component {
         if (hasError) return;
 
         this.setState({ loading: true, error2: '', error3: '' });
-        axios.post("http://localhost:9090/flavorfleet/user/reset-password", {
+        axios.post(`${API_BASE_URL}/flavorfleet/user/reset-password`, {
             phonenumber: this.state.phonenum,
             secretquestion: this.state.question,
             answer: ans,

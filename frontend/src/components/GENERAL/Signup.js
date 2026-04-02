@@ -3,6 +3,7 @@ import '../CSS/Login.css'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
 import { withRouter } from 'react-router-dom'
+import API_BASE_URL from '../../config/api';
 
 class Signup extends Component {
     constructor(props) {
@@ -48,7 +49,7 @@ class Signup extends Component {
 
         const admincode = document.getElementById("signupadmincode").value.trim();
 
-        axios.post("http://localhost:9090/flavorfleet/user/signup", {
+        axios.post(`${API_BASE_URL}/flavorfleet/user/signup`, {
             name: fname + " " + lname,
             phonenumber: phone,
             address: address,

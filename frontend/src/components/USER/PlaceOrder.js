@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import '../CSS/Placeorder.css'
 import UserLogin from './UserLogin';
+import API_BASE_URL from '../../config/api';
 
 export default class PlaceOrder extends Component {
 
@@ -158,13 +159,13 @@ export default class PlaceOrder extends Component {
         console.log("Final order object being sent:", JSON.stringify(this.obj, null, 2));
         console.log("Phone number verification:", this.obj.phonenumber);
 
-        axios.post("http://localhost:9090/flavorfleet/user/place-order", this.obj)
+        axios.post(`${API_BASE_URL}/flavorfleet/user/place-order`, this.obj)
             .then((resp) => {
                 console.log("Order successful:", resp.data);
 
                 // After placing order, redirect to rate the order
                 // First fetch the latest order to get its ID
-                axios.post("http://localhost:9090/flavorfleet/user/get-all-order-details", {
+                axios.post(`${API_BASE_URL}/flavorfleet/user/get-all-order-details`, {
                     phonenumber: this.userPhoneNumber
                 }).then((orderResp) => {
                     const orders = orderResp.data || [];

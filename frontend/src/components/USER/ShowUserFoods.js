@@ -4,6 +4,7 @@ import '../CSS/Showuserfood.css';
 import UserLogin from './UserLogin';
 import { withRouter } from 'react-router-dom';
 import { getFoodImage } from '../utils/foodImages';
+import API_BASE_URL from '../../config/api';
 
 class ShowUserFoods extends Component {
     constructor(props) {
@@ -31,7 +32,7 @@ class ShowUserFoods extends Component {
 
     fetchFoodItems = () => {
         axios
-            .get(`http://localhost:9090/flavorfleet/user/get-all-food-items`)
+            .get(`${API_BASE_URL}/flavorfleet/user/get-all-food-items`)
             .then((resp) => {
                 if (resp.data && Array.isArray(resp.data)) {
                     this.setState({
@@ -61,7 +62,7 @@ class ShowUserFoods extends Component {
         const q = query.toLowerCase();
 
         // Also try backend search-by-fooditem API
-        axios.post("http://localhost:9090/flavorfleet/user/search-by-fooditem", { search: query })
+        axios.post(`${API_BASE_URL}/flavorfleet/user/search-by-fooditem`, { search: query })
             .then((resp) => {
                 if (resp.data && resp.data.length > 0) {
                     // Map SearchFoodItem results to same format as get-all-food-items

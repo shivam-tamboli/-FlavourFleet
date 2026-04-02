@@ -3,6 +3,7 @@ import '../CSS/Login.css'
 import {Link} from 'react-router-dom'
 import axios from 'axios'
 import { withRouter } from 'react-router-dom'
+import API_BASE_URL from '../../config/api';
 
 class Login extends Component {
     constructor(props) {
@@ -25,7 +26,7 @@ class Login extends Component {
 
         this.setState({ loading: true, error1: '', error2: '' });
 
-        axios.post("http://localhost:9090/flavorfleet/user/login", { phonenumber: phonenum, password })
+        axios.post(`${API_BASE_URL}/flavorfleet/user/login`, { phonenumber: phonenum, password })
             .then((res) => {
                 this.setState({ loading: false });
                 if (res.data === "phone") {

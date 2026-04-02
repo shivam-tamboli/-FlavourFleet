@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import '../CSS/RateOrder.css';
 import UserLogin from './UserLogin';
+import API_BASE_URL from '../../config/api';
 
 export default class RateOrder extends Component {
     constructor(props) {
@@ -133,7 +134,7 @@ export default class RateOrder extends Component {
             return;
         }
 
-        axios.post("http://localhost:9090/flavorfleet/user/rate-order", ratingData)
+        axios.post(`${API_BASE_URL}/flavorfleet/user/rate-order`, ratingData)
             .then((resp) => {
                 console.log("✅ Rating submitted successfully:", resp.data);
                 alert("Thank you for your rating!");

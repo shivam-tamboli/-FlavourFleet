@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import '../CSS/UserOrders.css';
 import UserLogin from './UserLogin';
+import API_BASE_URL from '../../config/api';
 
 export default class UserOrders extends Component {
     constructor(props) {
@@ -43,7 +44,7 @@ export default class UserOrders extends Component {
             console.log("📥 Fetching orders for phone:", this.userPhoneNumber);
 
             const response = await axios.post(
-                "http://localhost:9090/flavorfleet/user/get-all-order-details",
+                `${API_BASE_URL}/flavorfleet/user/get-all-order-details`,
                 { phonenumber: this.userPhoneNumber },
                 {
                     timeout: 10000,

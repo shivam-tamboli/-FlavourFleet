@@ -3,6 +3,7 @@ import axios from 'axios';
 import { withRouter } from 'react-router-dom';
 import '../CSS/Addres.css'
 import { getFoodImage } from '../utils/foodImages';
+import API_BASE_URL from '../../config/api';
 
 class EditFooditem extends Component {
     constructor(props) {
@@ -37,7 +38,7 @@ class EditFooditem extends Component {
         this.setState({ loading: true });
         const finalImage = image || getFoodImage(foodName, 0);
 
-        axios.post("http://localhost:9090/flavorfleet/admin/edit-fooditems", {
+        axios.post(`${API_BASE_URL}/flavorfleet/admin/edit-fooditems`, {
             fooditemid: this.foodItemId,
             restaurantId: this.restaurantId,
             foodName, description,
