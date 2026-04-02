@@ -1,0 +1,15 @@
+target/
+!.target/*.jar
+*.jar
+!.target/*.jar
+.mvn/
+src/
+.git/
+.idea/
+*.md
+.classpath
+.project
+.settings/
+.factorypath
+*.iml
+.DS_Store
